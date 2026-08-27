@@ -1,3 +1,5 @@
+
+
 # DeepSeek Harness SDR Plugin
 
 [![npm version](https://img.shields.io/npm/v/@xuxchloris/dsh-sdr?logo=npm)](https://www.npmjs.com/package/@xuxchloris/dsh-sdr)
@@ -118,7 +120,7 @@ $env:DSH_SDR_AGENT_KNOWLEDGE = '1'
 
 Email、WhatsApp、CRM 都走 connector 接口，默认实现是 dry-run，`send()` 返回 `blocked-dry-run`。接真实渠道需要部署方注册自己的 connector 实现，审批流程不变。
 
-允许 Agent 补充部署配置时开启 `DSH_SDR_AGENT_CONFIG=1`。Agent 只能写 host、port、provider、发件人和凭证引用名，写不了密码和 token 的值。`DSH_SDR_AGENT_LIVE_CONFIG=1` 只保存 live 配置，不会自动启用真实发送。
+允许 Agent 补充部署配置时开启 `DSH_SDR_AGENT_CONFIG=1`。Agent 只能写 host、port、provider、secure、发件人和凭证引用名，写不了密码和 token 的值。`DSH_SDR_AGENT_LIVE_CONFIG=1` 只保存 live 配置，不会自动启用真实发送。
 
 任务状态默认保存在 `%USERPROFILE%\.dsh\.dsh-sdr\state.json`，可用 `DSH_SDR_DATA_FILE` 改路径。JSON 写入先落临时文件再 rename，进程中断不会写坏状态。
 

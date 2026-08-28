@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@xuxchloris/dsh-sdr?logo=npm)](https://www.npmjs.com/package/@xuxchloris/dsh-sdr)
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/Xuxchloris/deepseek-harness-sdr-plugin/blob/main/LICENSE)
 
-DeepSeek Harness `0.1.0-rc.6` 的 SDR 数字员工插件，提供九阶段外贸获客流程、知识检索、客户去重、人工审批和审计日志。
+DeepSeek Harness 的 SDR 数字员工插件，当前已实际验证 `0.1.0-rc.7` 和 `0.1.1-rc.2`，提供九阶段外贸获客流程、知识检索、客户去重、人工审批和审计日志。
 
 Email、WhatsApp、CRM 默认 dry-run，不会发送真实消息；运行时不依赖 Python 环境。
 
@@ -11,7 +11,7 @@ Email、WhatsApp、CRM 默认 dry-run，不会发送真实消息；运行时不�
 
 ## 安装
 
-要求 DeepSeek Harness `0.1.0-rc.6`、Node.js `20+`。
+当前已实际验证 DeepSeek Harness `0.1.0-rc.7` 和 `0.1.1-rc.2`、Node.js `20+`。官方 master 若要求更高 Node.js 版本，以其说明为准。
 
 ```powershell
 dsh plugin --profile web add @xuxchloris/dsh-sdr

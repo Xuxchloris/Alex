@@ -2,6 +2,6 @@
 # The runtime row installs the managed preset into DSH_HOME/.agent-presets/sdr.
 - insert:
     - id: dsh-sdr-installer
-      name: dsh-sdr
+      name: '@xuxchloris/dsh-sdr'
       config:
         role: installer

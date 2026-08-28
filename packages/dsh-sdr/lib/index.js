@@ -1,11 +1,13 @@
 import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import os from "node:os";
 import { ConnectorRegistry, JsonStore, SdrService, defaultStorePath } from "./domain.js";
 
 const PACKAGE_NAME = "dsh-sdr";
-const VERSION = "0.2.0";
+const PACKAGE_MANIFEST = createRequire(import.meta.url)("../package.json");
+const VERSION = PACKAGE_MANIFEST.version;
 const SOURCE_PRESET = fileURLToPath(new URL("../presets/sdr/", import.meta.url));
 
 function dshHome() {
@@ -86,7 +88,7 @@ const schemas = {
     properties: {
       query: { type: "string", description: "要检索的产品、品牌、市场或规则关键词" },
       types: { type: "array", items: { type: "string", enum: ["product", "brand", "policy", "case", "market", "company"] } },
-      limit: { type: "integer", minimum: 1, maximum: 20 },
+      limit: { type: "integer", description: "可选结果数，范围 1-20" },
     },
     required: ["query"],
   },
@@ -111,11 +113,10 @@ const schemas = {
     type: "object",
     additionalProperties: false,
     properties: {
-      k: { type: "integer", minimum: 1, maximum: 20, description: "评测前 K 个结果" },
+      k: { type: "integer", description: "评测前 K 个结果，范围 1-20" },
       queries: {
         type: "array",
-        minItems: 1,
-        maxItems: 100,
+        description: "至少 1 条、最多 100 条带标准答案的查询",
         items: {
           type: "object",
           additionalProperties: false,
@@ -131,6 +132,24 @@ const schemas = {
     required: ["queries"],
   },
 };
+
+function assertIntegerRange(value, name, minimum, maximum) {
+  if (value === undefined) return;
+  if (!Number.isInteger(value) || value < minimum || value > maximum) {
+    throw new Error(`${name} 必须是 ${minimum}-${maximum} 的整数`);
+  }
+}
+
+function validateKnowledgeSearchArgs(args) {
+  assertIntegerRange(args.limit, "limit", 1, 20);
+}
+
+function validateKnowledgeEvaluateArgs(args) {
+  assertIntegerRange(args.k, "k", 1, 20);
+  if (!Array.isArray(args.queries) || args.queries.length < 1 || args.queries.length > 100) {
+    throw new Error("queries 必须包含 1-100 条查询");
+  }
+}
 
 function deploymentConfigFromEnv() {
   const raw = process.env.DSH_SDR_DEPLOYMENT_CONFIG_JSON;
@@ -177,6 +196,7 @@ function registerNativeSdr(ctx, config = {}) {
     parameters: schemas.knowledgeSearch,
     async execute(args) {
       try {
+        validateKnowledgeSearchArgs(args);
         return await service.knowledgeSearch(args.query, { types: args.types, limit: args.limit });
       } catch (error) {
         return { error: String(error.message || error) };
@@ -216,6 +236,7 @@ function registerNativeSdr(ctx, config = {}) {
     parameters: schemas.knowledgeEvaluate,
     async execute(args) {
       try {
+        validateKnowledgeEvaluateArgs(args);
         return await service.knowledgeEvaluate(args);
       } catch (error) {
         return { error: String(error.message || error) };

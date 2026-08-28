@@ -10,7 +10,7 @@ DeepSeek Harness 的外贸获客 SDR 插件。安装后在 DSH Web 的模式菜�
 
 ## 安装
 
-要求 DeepSeek Harness `0.1.0-rc.6`、Node.js `20+`。
+当前已实际验证 DeepSeek Harness `0.1.0-rc.7` 和 `0.1.1-rc.2`、Node.js `20+`。官方 master 若要求更高 Node.js 版本，以其说明为准。
 
 ```powershell
 dsh plugin --profile web add @xuxchloris/dsh-sdr
@@ -142,7 +142,7 @@ docs/                   迁移方案和验收记录
 
 ## 限制
 
-- 只验证过 DSH `0.1.0-rc.6`，其他版本未测。
+- 已实际验证 DSH `0.1.0-rc.7` 和已发布的 `0.1.1-rc.2`；官方 master 的未发布版本尚未完成完整 UI 端到端验证。
 - 默认 JSON 存储适合本地和单实例；多实例部署用 PostgreSQL adapter。
 - 真实邮件、WhatsApp、CRM connector 不随包提供，只有接口和 dry-run 实现。
 - 当前会话不支持 agent 交互提问时，审批请求会失败，任务冻结在原地，不会跳过审批继续跑。

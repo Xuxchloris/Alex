@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -41,6 +41,15 @@ test("DSH native tools all publish object JSON schemas", async () => {
     assert.equal(item.output.schema.type, "object", item.name);
   }
   dispose();
+});
+
+test("bundle and SDR preset point at the published scoped package", async () => {
+  const patch = await readFile(new URL("../cordis.patch.yml", import.meta.url), "utf8");
+  const preset = await readFile(new URL("../presets/sdr/agent.cordis.yml", import.meta.url), "utf8");
+  assert.match(patch, /name:\s*['"]@xuxchloris\/dsh-sdr['"]/);
+  assert.doesNotMatch(patch, /name:\s*['"]dsh-sdr['"]/);
+  assert.match(preset, /name:\s*['"]@xuxchloris\/dsh-sdr['"]/);
+  assert.doesNotMatch(preset, /name:\s*['"]dsh-sdr['"]/);
 });
 
 test("审批询问透传 agent-owned 执行身份", async () => {

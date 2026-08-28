@@ -14,7 +14,7 @@
 - id: tool-ask-user
   name: '@deepseek-ai/dsh-tool-ask-user'
 - id: sdr-native-gate
-  name: dsh-sdr
+  name: '@xuxchloris/dsh-sdr'
   inject: [tools, userQuestions]
   config:
     role: agent

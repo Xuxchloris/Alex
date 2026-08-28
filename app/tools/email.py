@@ -69,7 +69,7 @@ async def run_draft(task: SDRTask, limit: int = 3) -> dict:
             "company": company,
             "subject": draft.subject,
             "body": draft.body,
-            "citations": [research.get("evidence", [])],
+            "citations": research.get("evidence", []),
             "case_notes": tips,
             "guardrail": "passed",
         })

@@ -32,5 +32,9 @@ jobs:
       - name: Run package tests
         run: npm test
 
+      - name: Verify package version matches tag
+        run: |
+          node -e 'const fs = require("node:fs"); const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); const tag = process.env.GITHUB_REF_NAME.replace(/^dsh-sdr-v/, ""); if (pkg.version !== tag) { throw new Error(`package.json version ${pkg.version} does not match tag ${tag}`); }'
+
       - name: Publish to npm
         run: npm publish --access public

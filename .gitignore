@@ -9,3 +9,4 @@ data/exports/*
 .npm-cache/
 .pnpm-store/
 .tmp-dsh-home*/
+work/

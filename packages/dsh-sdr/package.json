@@ -1,6 +1,6 @@
 {
   "name": "@xuxchloris/dsh-sdr",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "DeepSeek Harness plugin for a controllable SDR digital employee",
   "type": "module",
   "main": "lib/index.js",

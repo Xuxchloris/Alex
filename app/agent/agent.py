@@ -177,7 +177,7 @@ async def run_sdr(
     工具通过 RunContext[SDRTask].deps 就地修改任务状态。
     审计与持久化由 run_sdr_stream 的框架级事件流完成。
     prompt 缺省用任务原文；续跑时传推进指令即可。
-    structured=True 时，跑完后用报告子 Agent 生成 SDRReport。
+    structured=True 且任务已到 close 阶段时，用报告子 Agent 生成 SDRReport。
     """
     output = None
     try:
@@ -198,7 +198,7 @@ async def run_sdr(
         "audit_entries": len(task.audit_log),
         "model_output": output,
     }
-    if structured:
+    if structured and task.stage == "close":
         rep_agent = build_report_agent(model=model)
         rep_result = await rep_agent.run(
             f"任务 {task.task_id} 已执行到阶段 {task.stage}。"

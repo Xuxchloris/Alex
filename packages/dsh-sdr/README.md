@@ -80,8 +80,8 @@ Agent 只能写白名单字段和凭证引用名，写不了密码、token、API
 
 ```powershell
 npm version patch
-git tag dsh-sdr-v0.2.x
-git push origin dsh-sdr-v0.2.x
+git tag dsh-sdr-v0.2.3
+git push origin dsh-sdr-v0.2.3
 ```
 
 ## 许可证

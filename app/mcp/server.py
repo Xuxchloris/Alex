@@ -55,7 +55,6 @@ mcp = FastMCP(
 
 
 def _summary(task: SDRTask) -> dict:
-    draft_hash = hashlib.sha256(f"{product} catalogue for {company}\n{body}".encode()).hexdigest()
     return {
         "task_id": task.task_id,
         "task": task.task,
@@ -101,6 +100,7 @@ def _dry_plan(task: SDRTask) -> dict:
 def _stable_draft(task: SDRTask, company: str, index: int) -> dict:
     evidence = task.research.get(company, {}).get("evidence", [])
     product = task.plan.get("product", "户外用品")
+    subject = f"{product} catalogue for {company}"
     body = (
         f"Hello {company} team,\n\n"
         f"We noticed your public business profile in the outdoor market. "
@@ -108,10 +108,11 @@ def _stable_draft(task: SDRTask, company: str, index: int) -> dict:
         "Would a short catalogue review be useful?\n\n"
         "Best regards,\nSDR demo team"
     )
+    draft_hash = hashlib.sha256(f"{subject}\n{body}".encode("utf-8")).hexdigest()
     return {
         "email_id": f"draft_{index:02d}",
         "company": company,
-        "subject": f"{product} catalogue for {company}",
+        "subject": subject,
         "body": body,
         "citations": evidence,
         "case_notes": [n["title"] for n in load_case_notes()[:2]],

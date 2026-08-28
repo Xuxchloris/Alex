@@ -11,10 +11,15 @@ from app.tools import close, discovery, gates, planning, quotation, research, sc
 def test_dry_run_reaches_close_after_approval():
     task = SDRTask(task_id="T-dry", task="开发 3 个美国户外用品客户")
     server._dry_plan(task)
+    assert server._summary(task)["task_id"] == task.task_id
     discovery.run_discovery(task)
     research.run_research(task)
     scoring.run_scoring(task)
     server._dry_drafts(task)
+    assert all(
+        draft["draft_hash"] == gates.draft_fingerprint(task, draft["email_id"])
+        for draft in task.drafts
+    )
 
     for draft in task.drafts:
         gates.request_approval(task, draft["email_id"])

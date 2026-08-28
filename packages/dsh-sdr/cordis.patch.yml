@@ -1,4 +1,4 @@
-# dsh-sdr is a bundle layer for DSH 0.1.0-rc.6.
+# dsh-sdr is a bundle layer for DeepSeek Harness; see the README for the tested compatibility matrix.
 # The runtime row installs the managed preset into DSH_HOME/.agent-presets/sdr.
 - insert:
     - id: dsh-sdr-installer

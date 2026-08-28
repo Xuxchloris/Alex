@@ -1,0 +1,13 @@
+.git
+.github
+.pytest_cache
+.venv
+__pycache__
+*.pyc
+*.log
+.env
+tests
+docs
+项目交接.md
+项目计划书.md
+给Agent的任务.md

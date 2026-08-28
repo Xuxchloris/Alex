@@ -78,24 +78,6 @@ def send_card(chat_id: str, card: dict) -> None:
         log.warning("send_card failed: %s %s", resp.code, resp.msg)
 
 
-def send_card(chat_id: str, card: dict) -> None:
-    req = (
-        CreateMessageRequest.builder()
-        .receive_id_type("chat_id")
-        .request_body(
-            CreateMessageRequestBody.builder()
-            .receive_id(chat_id)
-            .msg_type("interactive")
-            .content(json.dumps(card, ensure_ascii=False))
-            .build()
-        )
-        .build()
-    )
-    resp = _get_http().im.v1.message.create(req)
-    if not resp.success():
-        log.warning("send_card failed: %s %s", resp.code, resp.msg)
-
-
 def _approval_card(task: SDRTask) -> dict:
     lines = [f"任务 {task.task_id} 已执行到「{task.stage}」，以下开发信待你审批："]
     for d in task.drafts:

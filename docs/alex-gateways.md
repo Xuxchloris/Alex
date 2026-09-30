@@ -6,7 +6,7 @@ Alex v0.3 是基于 Hermes 原生 profile 的外贸专家 Agent。日常入口�
 
 | 入口 | 适合的用法 | 本轮范围 |
 | --- | --- | --- |
-| Alex Agent | 对话交代外贸任务，研究客户、查邮件、在授权范围内开发跟进 | 独立 Hermes profile、24 项领域工具、3 项普通技能和品牌皮肤 |
+| Alex Agent | 对话交代外贸任务，研究客户、查邮件、在授权范围内开发跟进 | 独立 Hermes profile、28 项领域工具、4 项普通技能和品牌皮肤 |
 | Alex Web | 看客户、来源、任务、浏览器，人工接管和复核 | 可选管理页，默认 `http://127.0.0.1:3210` |
 | MCP stdio | 在支持 MCP 的客户端中调用 Alex | 19 个固定业务工具，经本机 API 访问；没有独立数据库 |
 | 远程 SSH 隧道 | 使用长期运行的 Linux 服务，同时从自己电脑看 Web | 将远端 loopback 端口转发到本机；不公开 Alex API |
@@ -24,7 +24,7 @@ ALEX_API_TOKEN_FILE=/absolute/path/to/alex-data/api-token
 
 token 文件由 Alex 首次启动生成，工具在内部读取。不要将 token 值写进技能、提示词或工具参数。显式 `ALEX_API_TOKEN` 也可通过安全环境绑定；它不是模型 API key。
 
-源码固定参考版为官方 Hermes `v2026.9.24` / v0.21.5，代码 commit `f97608f178d1ffeca59860195ab7da295f7c8e5f`；本机安装与 24 工具真实加载验证使用 v0.21.3、commit `db39ee3f2892185087bb2432eac242361056fc19`。24 项工具由原有 17 项业务工具和 7 项 Gmail/外发工具组成。仓库发行 SOUL、技能、皮肤和插件，复用已安装 Hermes，不维护另一份 Hermes core；旧 Desktop 侧栏仅是可选管理页入口。
+源码固定参考版为官方 Hermes `v2026.9.24` / v0.21.5，代码 commit `f97608f178d1ffeca59860195ab7da295f7c8e5f`；本机安装与 28 工具真实加载验证使用 v0.21.3、commit `db39ee3f2892185087bb2432eac242361056fc19`。28 项工具由原有 17 项业务工具和 11 项 Gmail/外发/跟进工具组成。仓库发行 SOUL、技能、皮肤和插件，复用已安装 Hermes，不维护另一份 Hermes core；旧 Desktop 侧栏仅是可选管理页入口。
 
 原生 profile 安装、插件注册、技能加载与卸载清理已验证；模型和渠道真实账号端到端仍分别验收。代码调用链、精确版本与继承范围见[Hermes 源码研究](alex-hermes-study.md)。
 
@@ -74,7 +74,7 @@ stdio 的标准输出必须只包含 MCP 消息，因此 npm 入口使用 `--sil
 
 路径按你的安装修改。文件路径不是秘密值；token 内容由进程读取，不由模型提供。MCP 使用标准 stdio 与固定工具 schema，连接只允许 loopback origin、禁止重定向，并绕过外部代理连接本机。详细配置和边界见[MCP 集成说明](../integrations/mcp/README.md)。
 
-19 个工具复用原有 17 个 Hermes 业务工具，并增加 `alex_health` 和 `alex_task_cancel`。它没有跟随 Hermes 插件增加 7 项邮箱/外发工具。MCP 进程不启动第二份业务服务、不自建数据库、不读取 bootstrap 取 token，也不提供审批、外发或恢复工具。未知 token、服务未启动或人工接管应返回实际错误。
+19 个工具复用原有 17 个 Hermes 业务工具，并增加 `alex_health` 和 `alex_task_cancel`。它没有跟随 Hermes 插件增加 11 项邮箱/外发/跟进工具。MCP 进程不启动第二份业务服务、不自建数据库、不读取 bootstrap 取 token，也不提供审批、外发或恢复工具。未知 token、服务未启动或人工接管应返回实际错误。
 
 ## 远程使用
 
@@ -96,11 +96,11 @@ ssh -N -L 3210:127.0.0.1:3210 <ssh-user>@<server>
 | --- | --- | --- | --- |
 | 持续对话 | CLI、Desktop、Gateway 会话与跨会话检索 | 独立 Alex profile 使用 Hermes Agent；Web 会话为辅助入口 | 各平台真实连接未验收 |
 | 长期记忆 | `MEMORY.md`、`USER.md`、memory 工具、会话搜索与可选 memory provider | SQLite 企业事实版本、带来源记忆、稳定客户 ID、证据、归档查重 | Hermes 对话记忆不代替客户业务数据库；团队隔离待开发 |
-| 技能迭代 | 按需技能、Hub、Agent 管理与创建技能 | SOUL + 入门、研究、跟进 3 项普通技能；插件兼容技能保留 | 尚无通过长期真实任务验证的自主行业学习闭环 |
+| 技能迭代 | 按需技能、Hub、Agent 管理与创建技能 | SOUL + 入门、研究、跟进 4 项普通技能；插件兼容技能保留 | 尚无通过长期真实任务验证的自主行业学习闭环 |
 | 浏览器 | 通用浏览器与 computer-use 工具生态 | 同一 Chromium 的 DOM 证据、画面、Agent/人工控制权与暂停恢复 | 公网访问受环境阻断；无验证码绕过 |
-| 多入口 | 原生 Messaging Gateway、插件、MCP 客户端等 | Hermes 24 工具 + MCP stdio 19 业务工具 + 可选 Web 管理页 | 渠道需要实际配置与逐项验收 |
+| 多入口 | 原生 Messaging Gateway、插件、MCP 客户端等 | Hermes 28 工具 + MCP stdio 19 业务工具 + 可选 Web 管理页 | 渠道需要实际配置与逐项验收 |
 | 外贸获客 | 可用通用工具开展研究，需自行组织业务流程 | 真实搜索外链→官网核验→去重→证据→待复核档案 | 首轮公网获客尚未通过；Google Maps/海关专用适配器待接入 |
-| 客户沟通 | Google Workspace、消息平台 adapter | Gmail 查读/新邮件、WhatsApp 文本发送、确切收件人策略、持久账本及退订 | 真实账号 E2E、Gmail 同线程回复、Cloud 主动模板和投递回执尚未验收或实现 |
+| 客户沟通 | Google Workspace、消息平台 adapter | Gmail 查读/线程同步/回复/跟进，WhatsApp 文本发送、确切收件人策略、持久账本及退订 | 真实账号 E2E 未验收，Cloud 主动模板和投递回执未实现 |
 | 备份与运行 | 官方 profile、session 和网关服务机制 | 一致数据库备份、校验恢复、单实例服务配置 | 异地副本由部署者配置；云开发环境不等于长期托管 |
 
 Hermes 有自己的原生 Windows 安装支持，不代表 Alex 的 Linux 锁与运行脚本可以直接在原生 Windows/macOS 运行。Alex 当前支持路径见[部署指南](alex-deployment.md)。

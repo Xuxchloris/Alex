@@ -6,9 +6,9 @@
 
 Alex 基于 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 的执行内核，提供独立的外贸身份、行业技能、长期业务记忆、真实浏览器研究和客户沟通工具。你在对话中交代目标，Alex 使用工具执行、保存证据和进度，再根据结果继续工作。
 
-**v0.3 · Hermes profile distribution · 24 项领域工具 · 本机持久数据 · MIT**
+**v0.4 · Hermes profile distribution · 28 项领域工具 · 持久客户跟进 · MIT**
 
-[启动 Agent](docs/alex-agent.md) · [邮箱与 WhatsApp](docs/alex-channels.md) · [Hermes 源码研究](docs/alex-hermes-study.md) · [验收记录](docs/alex-acceptance.md) · [后续路线](ROADMAP.md)
+[启动 Agent](docs/alex-agent.md) · [邮箱与 WhatsApp](docs/alex-channels.md) · [后台跟进](docs/alex-background.md) · [成熟项目对标](docs/alex-benchmark.md) · [验收记录](docs/alex-acceptance.md) · [后续路线](ROADMAP.md)
 
 ![Alex Agent 工具执行与重启续接演示](docs/assets/alex-agent.gif)
 
@@ -36,17 +36,16 @@ Alex 基于 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 的执�
 
 ```bash
 npm ci
-npm run doctor
-npm start
-```
-
-在另一个终端配置业务服务令牌的**文件路径**，然后启动独立 Agent：
-
-```bash
-export ALEX_API_TOKEN_FILE="/absolute/path/to/Alex/work/alex/api-token"
 npm run alex -- init
 npm run alex -- model
-npm run alex -- chat
+npm run alex -- start
+```
+
+`start` 在 Linux / WSL2 自动启动本机业务服务后进入对话，退出时只关闭它自己启动的服务。已有服务会复用。Windows 原生 Hermes 需要先在 WSL2 启动业务服务，并保存实际令牌的**文件路径**：
+
+```bash
+npm run alex -- connect --token-file "/absolute/path/to/Alex/work/alex/api-token"
+npm run alex -- doctor
 ```
 
 默认 Agent 数据位于 `~/.alex/profiles/alex`，不会复制原 Hermes 的凭据或会话。`model` 在这个独立 profile 中配置模型；业务服务自己的 `ALEX_LLM_API_KEY` 是可选管理页面规划器的配置，不代替 Agent 模型。
@@ -67,7 +66,9 @@ npm run alex -- gateway run
 
 `gateway setup` 配置**谁可以通过消息指挥 Alex**；客户外发名单是另一项本机配置。Gmail 使用 Hermes Google Workspace OAuth；WhatsApp 需要实际账号配对。只有用户明确授权具体收件人后，Agent 才能通过外发工具发送。
 
-当前已实现 Gmail 搜索/读信与新邮件发送接入、WhatsApp 发送接入、持久发送记录、幂等、每日额度和退订。WhatsApp Cloud 依赖运行中的 Gateway，仅接入已有服务会话的文本路径，尚无冷启动模板流程。`sent` 表示服务商接受，不表示送达或已读。
+当前已实现 Gmail 搜索/读信、原线程同步与回复、WhatsApp 发送接入，以及持久发送记录、幂等、每日额度和退订。Gmail 跟进保存到期时间；发送前再次查信，已回复、取消或退订时停止，查信失败不催发。WhatsApp Cloud 依赖运行中的 Gateway，仅接入已有服务会话的文本路径，尚无冷启动模板流程。`sent` 表示服务商接受，不表示送达或已读。
+
+后台入口为 `npm run alex -- routine install`，复用 Hermes 原生任务，重复安装不重复创建。首次创建为暂停状态，完成模型、邮箱和 Gateway 配置后再启动。详见[后台跟进](docs/alex-background.md)。
 
 ## 验证与当前边界
 

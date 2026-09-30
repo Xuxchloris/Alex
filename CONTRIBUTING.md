@@ -4,7 +4,7 @@ Alex 把用户业务资料、真实来源和可恢复任务作为业务核心。
 
 ## 开发准备
 
-本轮原生运行支持 Linux / WSL2，Windows 和 macOS 使用 Docker Desktop 路线。Node.js 24.5+，Chromium 采用系统安装或 Playwright 官方下载；详细准备步骤见[部署指南](docs/alex-deployment.md)。Python 仅用于 Hermes 扩展和旧项目验证。
+业务后端支持 Linux / WSL2；Windows 可运行原生 Hermes 并连接 WSL2 业务服务。原生 Windows 后端和 macOS 部署尚未验证。Node.js 24.5+，Chromium 采用系统安装或 Playwright 官方下载；详细准备步骤见[部署指南](docs/alex-deployment.md)。Python 用于 Hermes 扩展、邮箱账本与旧项目验证。
 
 使用已有 checkout 和 lockfile：
 

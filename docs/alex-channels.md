@@ -6,7 +6,7 @@
 
 | 渠道 | 能力 | 接入条件与限制 |
 | --- | --- | --- |
-| Gmail | 搜索、读信、带主题发送；保存 message ID / thread ID | 当前 Alex profile 的 Google Workspace OAuth；发送为新邮件，尚无同线程回复参数；未完成真实账号端到端验收 |
+| Gmail | 搜索、读信、新邮件、原线程同步与回复、持久跟进 | 当前 Alex profile 的 Google Workspace OAuth；已发送线程为关联起点；未完成真实账号端到端验收 |
 | WhatsApp / Baileys | 通过已配对 bridge 发送文本 | `npm run alex -- whatsapp` 配对，bridge 可用；无送达/已读回执接入 |
 | WhatsApp Cloud | 通过运行中 Gateway 的 adapter 发送文本 | Business 配置与可达 webhook；已有服务会话文本路径，无冷启动模板和独立 CLI sender |
 | IMAP/SMTP | Hermes 邮件网关接收 owner 指令并回复 | `gateway setup` 配置邮箱与 owner；不是 Alex 通用客户邮箱管理器，不通过其通用回复接口发送开发信 |
@@ -40,12 +40,18 @@ WhatsApp 使用带国家码的纯数字号码，渠道名为 `whatsapp` 或 `wha
 ## 工具与状态
 
 - `alex_mailbox_search` / `alex_mailbox_get`：Gmail 搜索结果和邮件内容，标为外部材料。
-- `alex_outreach_prepare`：保存渠道、收件人、主题、正文与可选 companyId，不发送。
+- `alex_mailbox_sync`：按已发送 deliveryId 同步真实线程，按消息 ID 去重，保存摘要与截断标记；不标记已读。较晚、同线程、确切客户地址的回信会停止该原邮件的待发跟进。
+- `alex_outreach_prepare`：保存渠道、收件人、主题、正文与可选 companyId，不发送。回复带 replyToMessageId，必须来自已同步线程并保留原主题与确切联系人；工具不按 Reply-To 改写目的地。
+- `alex_followup_schedule` / `alex_followups_list` / `alex_followup_cancel`：持久跟进时间、目的及停止状态；到期催发必须在草稿传 followupId。
 - `alex_outreach_list` / `alex_outreach_status`：历史、授权范围、额度和实际状态。
 - `alex_outreach_send`：检查授权、日额度和退订，原子占用一次尝试后调用渠道。
 - `alex_outreach_suppress`：保存退订或禁止联系，优先于允许名单，模型不能解除。
 
 同幂等键禁止改变内容。相同渠道、收件人和正文重复准备会返回已有记录。`sending` 在请求前落盘，重启后不盲目重发。超时或缺少明确回执记作 `unknown`，用户应先复查服务商历史。额度按 UTC 日期计算，包含不确定尝试。
+
+同线程回复还将原消息、线程和 RFC Message-ID 绑定到不可变草稿，并设置 References / In-Reply-To；遵循 [Gmail 线程规范](https://developers.google.com/workspace/gmail/api/guides/threads)。不同原消息可分别回复，相同原消息和内容不能换幂等键重复发送。跟进发送会再次同步真实线程：失败不发，已回复/取消/退订不发，未到期不发；读取完成后与提交发送之间仍有不可消除的服务商时间窗口。
+
+跟进自动化目前仅适用于已发送 Gmail 线程。日程本身不启动定时进程；具体配置见[后台跟进](alex-background.md)。WhatsApp 的入站关联、Cloud 主动模板和投递回执仍未实现。
 
 `sent` 只在服务商确认成功并给出消息 ID 时写入，含义是**服务商接受**，不能证明送达、已读、客户同意或业务转化。当前没有自动对账、投递 webhook 或自动解除不确定状态。
 

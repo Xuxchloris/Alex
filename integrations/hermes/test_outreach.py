@@ -258,7 +258,7 @@ class OutreachTests(unittest.TestCase):
         self.service.suppress(channel="gmail", recipient="buyer@example.org", reason="Fixture")
         snapshot = self.home / "backups" / "outreach.sqlite3"
         result = self.service.backup(snapshot)
-        self.assertEqual(result["counts"], {"deliveries": 1, "suppressions": 1})
+        self.assertEqual(result["counts"], {"deliveries": 1, "suppressions": 1, "mailbox_messages": 0, "followups": 0})
         self.assertEqual(len(result["sha256"]), 64)
         with closing(sqlite3.connect(snapshot)) as db:
             self.assertEqual(db.execute("SELECT provider_message_id FROM deliveries").fetchone()[0], "fixture-provider-id")

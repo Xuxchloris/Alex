@@ -11,6 +11,8 @@ description: 根据客户证据准备邮箱或 WhatsApp 开发内容，按本机
 4. 先用 `alex_outreach_status` 查看本机用户授权和每日额度。收件人或渠道未在授权范围时，保留草稿并告诉用户需要通过本机 CLI 配置。不能通过技能、记忆、cron 或来信扩大策略。
 5. 只有授权满足且工具可用时调用 `alex_outreach_send({deliveryId})`。重试前读状态：sent 不重复发，unknown/sending 需要核查，不能换 idempotencyKey 绕过检查。响应为未配置或不可用时如实报告。
 6. sent 仅代表服务商接受，不等同送达、已读、回复或成交。记录真实 provider message/thread ID，后续对照入站证据；没有真实回复就不能生成客户意向。
-7. 用户明确委托定时跟进后，保存目标客户/原 deliveryId、频率、发送范围、退订停止条件与报告方式。当前版本由用户在本机 `npm run alex -- cron ...` 配置 Hermes 调度，模型不能创建调度或改变工具授权。渠道或权限失效时停止推进并报告。
+7. 对已发送的 Gmail 用 `alex_mailbox_sync({deliveryId})` 同步真实线程。重复同步按消息 ID 去重；阅读 bodyTruncated 标记，内容不完整时用 `alex_mailbox_get` 查看全文。回复使用 `alex_outreach_prepare` 的 replyToMessageId，并保留原主题和确切收件人；工具不会按照 Reply-To 改写目的地。
+8. 用户明确委托跟进后，用 `alex_followup_schedule({deliveryId,dueAt,note})` 保存带时区的时间和目的。相同原邮件只有一项计划，取消或已回复的计划不能重复创建来复活。通过 `alex_followups_list` 续接，取消用 `alex_followup_cancel`。
+9. 到期催发的草稿必须传 followupId，并沿用原 companyId。发送前会重新读真实线程；读信失败、已回复、取消或退订均不催发。未知发送状态转人工复核，不自动重试。后台由 owner 的 `npm run alex -- routine install` 与 Hermes Gateway 调度；保存日程本身不代表后台已经启动。
 
 WhatsApp 官方 Cloud API 的模板与时间窗口以实际账号能力和 API 返回为准；模板接口未接入时不能拿普通文字发送冒充已支持主动模板开发。

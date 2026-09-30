@@ -41,6 +41,22 @@ jobs:
       - name: Run package tests
         run: npm test --prefix packages/dsh-sdr
 
+  windows-agent:
+    name: Windows Agent launcher and mail ledger
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: node --test tests/alex/agent-launcher.test.mjs
+      - run: python -m unittest discover -s integrations/hermes -p "test_*.py"
+
   python:
     name: Python compatibility tests
     runs-on: ubuntu-latest

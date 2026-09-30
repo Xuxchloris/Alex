@@ -1,0 +1,28 @@
+name: alex
+version: "0.1.0"
+description: "Alex 智能外贸助手：持久业务记忆、真实客户研究与浏览器接管"
+author: Xuxchloris
+license: MIT
+kind: standalone
+optional_env:
+  - ALEX_API_URL
+  - ALEX_API_TOKEN_FILE
+  - ALEX_API_TOKEN
+provides_tools:
+  - alex_profile_get
+  - alex_profile_update
+  - alex_memory_search
+  - alex_memory_add
+  - alex_plan
+  - alex_task_create
+  - alex_task_get
+  - alex_tasks_list
+  - alex_task_resume
+  - alex_task_pause
+  - alex_customers_list
+  - alex_customer_evidence
+  - alex_draft_create
+  - alex_browser_state
+  - alex_browser_navigate
+  - alex_browser_action
+  - alex_browser_extract

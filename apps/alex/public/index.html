@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#164b41">
+  <title>Alex · 智能外贸助手</title>
+  <link rel="icon" type="image/svg+xml" href="/alex.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="Alex 首页"><img src="/alex.svg" width="42" height="42" alt=""><span><strong>Alex<span class="brand-dot">.</span></strong><small>智能外贸助手</small></span></a>
+    <div class="header-center"><span class="status-dot" id="connection-dot"></span><span id="connection-label">正在连接工作空间</span></div>
+    <button class="button quiet" id="settings-button" type="button">工作空间设置 <span aria-hidden="true">↗</span></button>
+  </header>
+
+  <main class="workspace">
+    <aside class="planning-column">
+      <section class="intro"><span class="eyebrow">YOUR TRADE PARTNER</span><h1>让每一次发现，<br>成为下一次的起点。</h1><p>告诉 Alex 你的目标，查找客户、核验来源，并把结果留在你的工作空间。</p></section>
+      <section class="card profile-card">
+        <div class="section-heading"><h2>我的业务记忆</h2><button class="text-button" id="edit-profile" type="button">编辑</button></div>
+        <div id="profile-summary" class="profile-summary"><p class="muted">正在读取你的资料…</p></div>
+        <div class="profile-foot"><span class="mini-dot"></span><span id="profile-version">资料会随明确的新信息更新</span></div>
+      </section>
+
+      <section class="card composer-card">
+        <div class="section-heading"><h2>开始一个任务</h2><span class="subtle-label">由你的目标出发</span></div>
+        <form id="plan-form">
+          <label class="sr-only" for="request">向 Alex 描述你的任务</label>
+          <textarea id="request" name="request" rows="5" maxlength="10000" placeholder="介绍你的产品、目标市场和客户类型，或者说说这次想完成什么…" required></textarea>
+          <div class="composer-footer"><span>读取历史资料，延续你的工作</span><button class="button primary" id="plan-button" type="submit">制定方案 <span aria-hidden="true">↗</span></button></div>
+        </form>
+        <p class="inline-note hidden" id="model-notice"></p>
+        <button class="text-button secondary-link" id="structured-open" type="button">直接填写筛选条件 / 核验官网</button>
+        <div id="plan-result" class="plan-result hidden" aria-live="polite"></div>
+      </section>
+      <section class="small-note"><span class="note-symbol" aria-hidden="true">◎</span><p>发现结果附带来源。已存档客户继续参加查重，后续任务可从历史进度继续。</p></section>
+      <div class="column-bottom"><button class="text-button" id="memories-button" type="button">查看记忆与存档 <span aria-hidden="true">→</span></button><span>Alex · v0.1</span></div>
+    </aside>
+
+    <section class="browser-column card">
+      <div class="browser-heading"><div><span class="eyebrow">LIVE WORKSPACE</span><h2>一起看，一起完成</h2></div><span class="badge neutral" id="browser-owner">读取中</span></div>
+      <div class="browser-notice" id="browser-notice">连接浏览器后，你可以看到任务访问的真实网页。</div>
+      <form class="address-bar" id="navigate-form"><span aria-hidden="true">◉</span><label class="sr-only" for="browser-url">网页地址</label><input id="browser-url" type="url" placeholder="https://公司官网" autocomplete="off" spellcheck="false"><button class="button small" id="navigate-button" type="submit">访问</button></form>
+      <div class="browser-canvas" id="browser-canvas" tabindex="0" aria-label="浏览器画面，接管后可点击页面及使用键盘">
+        <img class="hidden" id="browser-frame" alt="当前任务浏览器的实时画面" draggable="false">
+        <div class="browser-placeholder" id="browser-placeholder"><div class="browser-illustration" aria-hidden="true"><span></span><span></span><span></span><div>↗</div></div><h3>你的研究窗口</h3><p id="browser-empty-text">任务开始后，Alex 会在这里访问网页。<br>你也可以接管浏览器，亲自继续。</p></div>
+      </div>
+      <div class="browser-controls"><span id="browser-title" class="browser-title">还没有打开网页</span><button class="button" id="takeover-button" type="button">接管浏览器</button><button class="button primary hidden" id="release-button" type="button">交还 Alex</button></div>
+      <div id="human-controls" class="human-controls hidden"><form id="browser-type-form"><label class="sr-only" for="browser-text">向当前焦点输入内容</label><input id="browser-text" placeholder="点击页面输入框，再在这里输入内容" maxlength="10000"><button class="button small" type="submit">输入</button></form><div class="key-controls"><button class="button small" data-browser-key="Enter" type="button">回车</button><button class="button small" data-browser-key="Tab" type="button">Tab</button><button class="button small" data-browser-key="Backspace" type="button">退格</button><button class="button small" data-scroll="-500" type="button">↑ 上滚</button><button class="button small" data-scroll="500" type="button">↓ 下滚</button></div><p>接管会暂停进行中的任务。交还后，在任务列表中继续。</p></div>
+      <div class="browser-caption"><span class="mini-dot"></span><span>网页证据与客户资料保存在同一工作空间</span></div>
+    </section>
+
+    <section class="results-column card">
+      <div class="results-heading"><span class="eyebrow">YOUR PIPELINE</span><h2>每一步，都有记录。</h2><p>客户、任务与草稿，随时接着做。</p></div>
+      <nav class="tabs" aria-label="工作记录"><button class="tab active" data-tab="companies" type="button" aria-selected="true">客户 <span id="company-count">0</span></button><button class="tab" data-tab="tasks" type="button" aria-selected="false">任务 <span id="task-count">0</span></button><button class="tab" data-tab="drafts" type="button" aria-selected="false">草稿 <span id="draft-count">0</span></button><button class="tab" data-tab="backups" type="button" aria-selected="false">备份</button></nav>
+      <div class="tab-panel" id="companies-panel"><div class="list-toolbar"><label class="search-box"><span aria-hidden="true">⌕</span><input id="company-search" placeholder="搜索公司、官网或联系方式" aria-label="搜索客户"></label><button class="text-button" id="export-button" type="button">导出 CSV</button></div><label class="checkbox-row"><input id="include-archived" type="checkbox"> 包含已归档客户</label><div id="companies-list" class="record-list"></div></div>
+      <div class="tab-panel hidden" id="tasks-panel"><div class="list-toolbar"><span class="muted">可暂停、恢复和查看过程</span><button class="text-button" id="refresh-tasks" type="button">刷新</button></div><div id="tasks-list" class="record-list"></div></div>
+      <div class="tab-panel hidden" id="drafts-panel"><div class="list-toolbar"><span class="muted">复核内容后保留审批记录</span></div><div id="drafts-list" class="record-list"></div><p class="panel-note">草稿由你复核；当前版本不会发送邮件。</p></div>
+      <div class="tab-panel hidden" id="backups-panel"><div class="backup-intro"><div class="backup-icon" aria-hidden="true">↥</div><h3>给积累留一份备份</h3><p>备份客户、记忆、任务和证据，保留可恢复的历史。</p><button class="button primary" id="backup-button" type="button">立即创建备份</button></div><div id="backups-list" class="record-list"></div><p class="panel-note">当前备份保存在本机。异地副本与恢复说明请查看工作空间设置。</p></div>
+      <div class="results-foot"><span class="mini-dot"></span> 来源可追溯，历史可延续</div>
+    </section>
+  </main>
+  <div class="toast-region" id="toast-region" aria-live="polite"></div>
+  <dialog id="modal"><div class="modal-heading"><h2 id="modal-title"></h2><button class="icon-button" id="modal-close" type="button" aria-label="关闭">×</button></div><div id="modal-body"></div></dialog>
+</body>
+</html>

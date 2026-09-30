@@ -9,6 +9,23 @@ permissions:
   contents: read
 
 jobs:
+  alex:
+    name: Alex persistent workbench and real browser tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright-core install --with-deps chromium
+      - name: Run Alex tests
+        run: |
+          export ALEX_CHROMIUM_PATH="$(node --input-type=module -e 'import { chromium } from "playwright-core"; process.stdout.write(chromium.executablePath())')"
+          npm test
+      - run: npm run test:hermes
+
   node:
     name: Node DSH plugin tests
     runs-on: ubuntu-latest
@@ -39,7 +56,7 @@ jobs:
           cache-dependency-path: requirements-dev.txt
 
       - name: Install test dependencies
-        run: python -m pip install -r requirements-dev.txt
+        run: python -m pip install -r requirements-dev.txt 'mcp==1.30.0'
 
       - name: Run Python tests
         run: python -m pytest -q

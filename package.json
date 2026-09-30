@@ -1,0 +1,21 @@
+{
+  "name": "alex-trade-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Alex，智能外贸助手：真实浏览器、长期记忆与客户档案",
+  "engines": {
+    "node": ">=24.5.0"
+  },
+  "scripts": {
+    "start": "node --use-env-proxy --env-file-if-exists=.env apps/alex/server.mjs",
+    "test": "node --use-env-proxy --test --test-concurrency=2 tests/alex/*.test.mjs",
+    "backup": "node --use-env-proxy --env-file-if-exists=.env scripts/alex-backup.mjs",
+    "smoke:live": "node --use-env-proxy --env-file-if-exists=.env scripts/alex-live-smoke.mjs",
+    "test:legacy": "npm test --prefix packages/dsh-sdr",
+    "test:hermes": "python integrations/hermes/test_plugin.py"
+  },
+  "dependencies": {
+    "playwright-core": "1.63.0"
+  }
+}

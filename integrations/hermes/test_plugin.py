@@ -3,6 +3,7 @@
 import importlib.util
 import json
 import os
+import sys
 from pathlib import Path
 import tempfile
 import threading
@@ -14,6 +15,7 @@ from unittest.mock import patch
 PLUGIN_DIR = Path(__file__).parent
 spec = importlib.util.spec_from_file_location("alex_plugin_under_test", PLUGIN_DIR / "__init__.py")
 plugin = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = plugin
 spec.loader.exec_module(plugin)
 
 
@@ -78,14 +80,16 @@ class PluginTests(unittest.TestCase):
         return json.loads(self.context.tools[name]["handler"](params or {}, session_key="fixture"))
 
     def test_registers_native_schemas_and_readable_bundled_skill_without_network(self):
-        self.assertEqual(set(self.context.tools), set(plugin.TOOLS))
+        from alex_plugin_under_test.outreach import OUTREACH_TOOLS
+        self.assertEqual(set(self.context.tools), set(plugin.TOOLS) | set(OUTREACH_TOOLS))
         for name, tool in self.context.tools.items():
             self.assertEqual(tool["schema"]["name"], name)
             self.assertEqual(tool["toolset"], "alex")
         skill = self.context.skills["trade-research"]["path"]
         self.assertTrue(skill.is_file())
-        self.assertEqual(skill.read_text(), (PLUGIN_DIR.parent.parent / "skills/alex/SKILL.md").read_text())
-        self.assertFalse(any(word in name for name in self.context.tools for word in ("approve", "review", "send", "token", "bootstrap", "takeover", "release")))
+        self.assertEqual(skill.read_text(encoding="utf-8"), (PLUGIN_DIR.parent.parent / "skills/alex/SKILL.md").read_text(encoding="utf-8"))
+        self.assertFalse(any(word in name for name in self.context.tools for word in ("approve", "authorize", "token", "bootstrap", "takeover", "release")))
+        self.assertIn("alex_outreach_send", self.context.tools)
         self.assertEqual(self.calls, [])
 
     def test_task_creation_preserves_contract_and_authentication(self):

@@ -1,22 +1,24 @@
 {
   "name": "alex-trade-assistant",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Alex，智能外贸助手：真实浏览器、长期记忆与客户档案",
+  "description": "Alex 外贸专家 Agent：Hermes 执行内核、长期记忆、真实客户研究与消息工作流",
   "engines": {
     "node": ">=24.5.0"
   },
   "scripts": {
+    "alex": "node scripts/alex-agent.mjs",
     "start": "node --use-env-proxy --env-file-if-exists=.env apps/alex/server.mjs",
     "doctor": "node --use-env-proxy --env-file-if-exists=.env scripts/alex-doctor.mjs",
     "gateway:mcp": "node --use-env-proxy --env-file-if-exists=.env services/alex-mcp/index.mjs",
     "demo:record": "node --use-env-proxy scripts/alex-record-demo.mjs",
+    "demo:agent": "node scripts/alex-record-agent-demo.mjs",
     "test": "node --use-env-proxy --test --test-concurrency=2 tests/alex/*.test.mjs",
     "backup": "node --use-env-proxy --env-file-if-exists=.env scripts/alex-backup.mjs",
     "smoke:live": "node --use-env-proxy --env-file-if-exists=.env scripts/alex-live-smoke.mjs",
     "test:legacy": "npm test --prefix packages/dsh-sdr",
-    "test:hermes": "python integrations/hermes/test_plugin.py"
+    "test:hermes": "python -m unittest discover -s integrations/hermes -p test_*.py"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.31.0",

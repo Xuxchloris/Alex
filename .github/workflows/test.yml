@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   alex:
-    name: Alex persistent workbench and real browser tests
+    name: Alex Agent, persistence and real browser tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

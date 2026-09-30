@@ -1,7 +1,7 @@
 """Hermes v2026.9.24 native plugin for the local Alex HTTP service.
 
 Only the Python standard library is required. Credentials are deployment
-configuration, never model arguments. There is no approval or sending tool.
+configuration, never model arguments. Outreach uses the owner's local policy.
 """
 
 from __future__ import annotations
@@ -13,6 +13,8 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
+
+from .outreach import register_outreach
 
 
 class AlexError(Exception):
@@ -231,5 +233,6 @@ def register(ctx):
             except (TypeError, KeyError, AttributeError):
                 return json.dumps({"ok": False, "code": "invalid_response", "error": "Alex API returned an unexpected result."})
         ctx.register_tool(name=name, toolset="alex", schema={"name": name, "description": description, "parameters": parameters}, handler=handler)
+    register_outreach(ctx)
     ctx.register_skill(name="trade-research", path=Path(__file__).parent / "skills" / "trade-research" / "SKILL.md",
                        description="Understand the user's business, remember it and research real customers with evidence.")

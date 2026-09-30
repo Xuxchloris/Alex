@@ -1,137 +1,98 @@
-<p align="center">
-  <img src="docs/assets/alex-banner.png" alt="Alex — Intelligent Trade Assistant" width="960">
-</p>
+<p align="center"><img src="docs/assets/alex-agent-social-preview.png" alt="Alex — Your foreign-trade agent" width="900"></p>
 
-# Alex · 智能外贸助手
+# Alex · 外贸专家 Agent
 
-**记住你的业务，研究真实客户，留下能继续工作的档案。**
+**了解你的产品，研究真实买家，记住每次交流，持续推进客户开发。**
 
-Alex 是面向外贸工作的开源 Agent 工作台。它围绕用户的产品、市场和客户类型开展研究，把业务记忆、对话、客户、来源证据和任务进度保存到同一个数据库。Hermes 可作为 Agent 与消息网关，Alex 提供行业工具和客户资产；其他兼容客户端可通过标准 MCP 接入。
+Alex 基于 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 的执行内核，提供独立的外贸身份、行业技能、长期业务记忆、真实浏览器研究和客户沟通工具。你在对话中交代目标，Alex 使用工具执行、保存证据和进度，再根据结果继续工作。
 
-**v0.2 · Node.js 24.5+ · Chromium · SQLite · MIT**
+**v0.3 · Hermes profile distribution · 24 项领域工具 · 本机持久数据 · MIT**
 
-[操作手册](docs/alex-user-guide.md) · [运行与部署](docs/alex-deployment.md) · [网关入口](docs/alex-gateways.md) · [优化路线](ROADMAP.md) · [验收记录](docs/alex-acceptance.md)
+[启动 Agent](docs/alex-agent.md) · [邮箱与 WhatsApp](docs/alex-channels.md) · [Hermes 源码研究](docs/alex-hermes-study.md) · [验收记录](docs/alex-acceptance.md) · [后续路线](ROADMAP.md)
 
-## 看看工作台
+![Alex Agent 工具执行与重启续接演示](docs/assets/alex-agent.gif)
 
-![Alex 工作台功能演示](docs/assets/alex-workbench.gif)
+动图展示实际 Hermes 工具循环、Alex API 与 SQLite 的执行记录。模型决定使用明确标注的脚本 fixture：两次进程共 10 次真实工具调用，验证业务记忆、重启恢复、草稿去重与默认拒绝外发。真实模型调用、公开获客和发送均为 0。[查看完整记录](docs/assets/alex-agent-demo-manifest.json)。
 
-动图录制实际工作台和 Chromium 操作，画面始终标注“功能演示 · 测试网站”。测试公司用于展示资料保存、官网核验、证据、去重、备份和人工接管，**不计入真实获客成果**。可用 `npm run demo:record` 在临时数据目录重新录制；依赖与素材说明见 [assets](docs/assets/README.md)。
+## 它怎样工作
 
-## 能做什么
+首次交流，Alex 先读取已有资料，再了解产品、目标市场和买家类型。产品优势、认证、交期、渠道偏好等用户明确提供的事实会保存下来，下次会话继续使用。
 
-| 能力 | 当前行为 |
+研究任务由 Agent 分析条件，调用真实 Chromium 访问网页，保存公司、公开联系方式、来源原文和任务检查点。重复研究复用客户身份；中断后可以继续原任务。
+
+接入 Gmail 后，Alex 可以查询邮件、阅读回复并准备开发信。Gmail、WhatsApp 和 WhatsApp Cloud 的外发经过本机收件人策略与通信记录：保存正文、执行发送、记录服务商消息 ID、处理退订，避免不确定状态下重复发送。实际能力与连接步骤见[渠道说明](docs/alex-channels.md)。
+
+| Alex 的组成 | 职责 |
 | --- | --- |
-| 多轮交流 | 历史会话与消息持久化；沿上一轮补充缺失条件，用户核对提案后启动研究 |
-| 长期业务记忆 | 保存明确的资料和偏好；临时任务要求留在任务里，不推断为长期习惯 |
-| 真实网页研究 | 访问实际搜索来源和公司官网，抽取 DOM、公开联系方式和引用证据 |
-| 客户资产 | 稳定客户 ID、身份查重、历史证据、归档和 CSV；已归档客户仍参与查重 |
-| 同一个浏览器 | 查看 Chromium 实际画面、接管、点击、输入、滚动；接管时 Agent 暂停 |
-| 持续工作 | 检查点、暂停、取消、重启恢复；新进程不能同时占用同一数据目录 |
-| 草稿与留档 | 基于已存证据准备开发信、人工复核、保留版本；当前没有发送渠道 |
-| 备份恢复 | 在线一致性 SQLite 备份、校验和、恢复至新空目录；对话也在业务备份内 |
-| Agent 入口 | Hermes 原生插件与标准 MCP stdio 网关，复用同一资料和浏览器 |
+| Hermes 执行内核 | 模型与工具循环、上下文、会话、记忆、技能、网关和定时运行基础 |
+| Alex 身份与技能 | 产品访谈、市场与买家研究、证据判断、开发沟通与跟进 |
+| Alex 领域工具 | 业务资料、客户、证据、浏览器、研究任务、邮箱与通信记录 |
+| 本机数据 | Alex SQLite 保存客户与来源；独立 profile 保存 Agent 会话与记忆；通信账本保存尝试与退订 |
+| 可选管理页面 | 查看客户、证据和任务，必要时接管浏览器 |
 
-没有配置模型时，对话仍可存档，但不会生成虚构回复；结构化条件和已知官网仍可用于网页研究。打不开、无联系方式或数量不足时报告实际结果，不生成演示客户补数。
+## 启动
 
-**当前是个人工作空间。** Google Maps 专用获客适配、授权海关企业交易数据、CRM、邮件/WhatsApp 外发和生产多租户尚未实现。实际来源、模型和消息平台能否使用，须按真实网络、凭据及账号权限分别验收。
-
-## 在哪里运行
-
-| 场景 | 推荐方案 | 访问入口 |
-| --- | --- | --- |
-| Linux 本机 / Windows WSL2 | Node.js + Chromium + `flock` | 本机浏览器 `http://127.0.0.1:3210` |
-| Windows / macOS | Docker Desktop，按部署指南启动 | 本机映射端口 `3210` |
-| 长期运行的 Linux 电脑或 VPS | 持久数据盘，systemd 或 Docker，SSH 隧道访问 | 隧道后的本机 `3210` |
-| Hermes 用户 | 同机 Alex 服务 + Hermes 插件；需要时启用 Hermes 消息网关 | Hermes 对话 / 原生工作台入口 |
-| 其他 Agent 客户端 | 同机 Alex 服务 + MCP stdio 进程 | 客户端工具列表 |
-
-Codex 云环境用于开发和验证，进程不作为长期托管服务。浏览器、资料和模型调用运行在 **Alex 服务所在机器**；MCP 与 Hermes 插件是入口，不另建客户数据库。Docker 与 systemd 配置已提供，实际运行状态以[验收记录](docs/alex-acceptance.md)为准。
-
-## Linux / WSL2 快速开始
-
-准备 Node.js **24.5+**、Chromium 和 `flock`。浏览器不在 `/usr/bin/chromium` 时设置 `ALEX_CHROMIUM_PATH`。
+准备已安装的 [Hermes](https://github.com/NousResearch/hermes-agent)、Node.js **24.5+** 和 Chromium。Alex 业务服务使用 Linux / WSL2 的 `flock`。Windows 可以使用原生 Hermes + WSL2 业务服务。
 
 ```bash
 npm ci
-# 保留已有配置；仅首次创建。
-test -e .env || cp .env.example .env
 npm run doctor
 npm start
 ```
 
-打开 **http://127.0.0.1:3210**。在本机 `.env` 或安全的进程环境中配置模型，勿将密钥放入聊天或 Git：
+在另一个终端配置业务服务令牌的**文件路径**，然后启动独立 Agent：
 
-```dotenv
-ALEX_LLM_BASE_URL=https://api.deepseek.com/v1
-ALEX_LLM_MODEL=deepseek-chat
-ALEX_LLM_API_KEY=
+```bash
+export ALEX_API_TOKEN_FILE="/absolute/path/to/Alex/work/alex/api-token"
+npm run alex -- init
+npm run alex -- model
+npm run alex -- chat
 ```
 
-默认数据位于被 Git 忽略的 `work/alex/`；`ALEX_DATA_DIR` 可指向持久磁盘。不要通过清空数据解决报错。服务只提供本机工作空间；远程访问按部署指南使用 SSH 隧道，不能直接把本机 bootstrap 暴露为公网 SaaS。
+默认 Agent 数据位于 `~/.alex/profiles/alex`，不会复制原 Hermes 的凭据或会话。`model` 在这个独立 profile 中配置模型；业务服务自己的 `ALEX_LLM_API_KEY` 是可选管理页面规划器的配置，不代替 Agent 模型。
 
-Docker、服务管理、更新、日志、备份和 SSH 的完整命令见[部署指南](docs/alex-deployment.md)。`npm run --silent doctor -- --json` 输出不含密钥的运行诊断。
+可以这样开始：
 
-## 接入什么网关
+> 我们出口不锈钢厨房用品，主要做 OEM，目标是德国和荷兰的进口商与餐厨品牌。先了解我们的产品与限制，再研究客户，保留每个判断的来源。
 
-```mermaid
-flowchart LR
-  WEB[Alex 工作台] --> API[Alex 本机服务 :3210]
-  CHANNEL[Hermes 支持的消息平台] --> H[Hermes Gateway / Agent]
-  H --> PLUGIN[Alex 原生插件]
-  PLUGIN --> API
-  CLIENT[MCP 客户端] --> MCP[Alex MCP stdio 网关]
-  MCP --> API
-  API --> DB[同一 SQLite 档案]
-  API --> B[同一 Chromium 会话]
-  API --> L[配置的模型接口]
+Windows 路径、更新、会话续聊、渠道、授权策略和备份见[完整启动说明](docs/alex-agent.md)。
+
+## 邮箱与 WhatsApp
+
+```bash
+npm run alex -- gateway setup
+npm run alex -- whatsapp
+npm run alex -- gateway run
 ```
 
-**Hermes：** 扩展对齐官方 `v2026.9.24` 的插件接口，注册 17 个行业工具和 `alex:trade-research` 技能。消息平台通过 Hermes 自己的 Gateway 配置；Alex 没有独立启动一个 Telegram、飞书或 WhatsApp Bot。见[Hermes 安装说明](integrations/hermes/README.md)与[入口选择](docs/alex-gateways.md)。
+`gateway setup` 配置**谁可以通过消息指挥 Alex**；客户外发名单是另一项本机配置。Gmail 使用 Hermes Google Workspace OAuth；WhatsApp 需要实际账号配对。只有用户明确授权具体收件人后，Agent 才能通过外发工具发送。
 
-**MCP：** 标准 stdio 协议，官方 SDK 实现，提供行业工具与健康检查。客户端配置使用 `node` 和入口绝对路径，或 `npm run --silent gateway:mcp`，避免 npm 日志污染协议。先启动 Alex，再启动 MCP 网关，令牌从受保护文件内部读取。见[MCP 配置示例](integrations/mcp/README.md)。
+当前已实现 Gmail 搜索/读信与新邮件发送接入、WhatsApp 发送接入、持久发送记录、幂等、每日额度和退订。WhatsApp Cloud 依赖运行中的 Gateway，仅接入已有服务会话的文本路径，尚无冷启动模板流程。`sent` 表示服务商接受，不表示送达或已读。
 
-两种入口都不提供审批、发送、数据备份恢复或抢回人工浏览器控制权的工具；任务可以从已有检查点继续。
-
-## 第一次交流与下次继续
-
-1. 告诉 Alex 产品、市场、客户类型与约束；它先读取已有业务记忆，再询问缺失信息。
-2. 在同一会话继续补充，核对提案后点“执行此方案”；也可直接填写条件或核验已知官网。
-3. 在客户详情核对来源、时间、正文引用与联系方式；需要处理网页时接管浏览器。
-4. 继续历史会话或恢复原任务；归档、导出和备份客户资产。复核草稿后保留审批记录。
-
-详细步骤、常见问题和恢复演练见[操作手册](docs/alex-user-guide.md)。
-
-## 验证与迭代
+## 验证与当前边界
 
 ```bash
 npm test
+npm run test:hermes
 npm run test:legacy
-python integrations/hermes/test_plugin.py
-npm run backup
 ```
 
-`npm test` 覆盖真实 Chromium、持久化、会话、任务恢复、备份、HTTP 和官方 MCP 客户端互通。受控网页与模型替身验证工程行为，不能替代公网获客或真实模型验收；实际结果与阻断记录见[验收记录](docs/alex-acceptance.md)。
+工程验证使用隔离数据、受控网页与提供商替身；这些测试不计入真实客户开发成果。**真实模型、邮箱/WhatsApp 账号和公网获客仍需在实际配置下验收。当前生产客户数为 0。** 未配置或连接失败时返回实际错误，不生成客户补数或模拟发送成功。
 
-[ROADMAP.md](ROADMAP.md) 列出与 Hermes 的能力对应及每一阶段验收目标。新增来源必须有授权路径、真实提取、证据、预算、阻断状态和回归场景。贡献方式见[CONTRIBUTING.md](CONTRIBUTING.md)。
+定时执行复用 Hermes 的原生 CLI，由用户在本机配置；默认不向模型开放创建定时任务、终端和文件写入权限。Google Maps 专用适配器、授权海关企业数据、CRM 同步、多租户与正式容器部署验收仍在[路线图](ROADMAP.md)。
+
+## 项目结构
 
 ```text
-apps/alex/               工作台与本机 HTTP 服务
-packages/alex-core/      资料、记忆、会话、客户、证据、任务和备份
-services/alex-browser/   共享 Chromium 与人工接管
-services/alex-research/  真实来源研究与模型规划
-services/alex-conversation/ 多轮交流与研究提案
-services/alex-mcp/       标准 MCP stdio 网关
-integrations/hermes/     原生行业工具、技能和 Desktop 入口
-integrations/mcp/        客户端配置与集成说明
-deploy/alex/             Docker / systemd 部署配置
-docs/                    操作、部署、网关、架构与验收
-docs/assets/             原创图标、横幅和可复现 GIF
-tests/alex/              行为与集成验证
+agent/                       Alex 身份、独立 profile、技能和品牌皮肤
+scripts/alex-agent.mjs        init / update / chat / model / gateway 入口
+integrations/hermes/          领域插件、邮箱及通信账本
+packages/alex-core/           客户、业务记忆、证据、任务和备份
+services/alex-browser/        真实 Chromium 与人工接管
+services/alex-research/       来源检索、官网研究与检查点
+apps/alex/                   本机 API 与可选管理页面
+services/alex-mcp/            19 项研究工具的标准 MCP 入口
+docs/                        操作、设计依据、验收和原创素材
 ```
 
-## 兼容与许可证
-
-原 `packages/dsh-sdr/` 和 `app/` Python 项目保留，旧 Docker 配置仍属于旧 Python 服务；Alex 使用 `deploy/alex/`。旧离线合成数据不是 Alex 真实研究的回退路径。
-
-MIT。请勿提交 `.env`、浏览器登录状态、真实客户数据、备份或 API key。品牌与演示素材说明见[素材说明](docs/assets/README.md)。
+原 DeepSeek Harness 插件位于 `packages/dsh-sdr/`，保留兼容；旧演示数据不进入 Alex 生产客户库。Alex 以 Hermes 为上游运行依赖，不随仓库复制其完整源码。项目和原创素材按 MIT 分发，参见 [LICENSE](LICENSE) 与[素材说明](docs/assets/README.md)。

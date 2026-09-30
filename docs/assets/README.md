@@ -1,4 +1,24 @@
-# Alex 品牌与工作台演示
+# Alex 品牌与演示
+
+## v0.3 Agent 品牌
+
+新主页使用 `alex-agent-icon.png`（透明图标）和 `alex-agent-social-preview.png`（2:1 分享横幅，低于 1 MB）。深海蓝 A / 翼形与珊瑚橙方向切口对应 Alex 的外贸 Agent 身份。生成工具、完整提示词、尺寸与源文件记录见[品牌来源说明](alex-agent-brand-notes.md)。
+
+`alex-agent.gif` 是实际 Hermes AIAgent + Alex 插件/API/SQLite 的工具执行记录可视化，1100×640、12.6 秒。模型决定为脚本 fixture，画面持续标注；它不是实际模型推理或客户获客成果。原生循环跨两个进程执行 10 次工具调用，验证重启读取资料、同一草稿去重、默认拒绝外发，真实发送与生产客户均为 0。详见[完整 trace](alex-agent-demo-manifest.json)。
+
+在 Linux / WSL2 安装 Hermes Python 环境、Chromium 和 ffmpeg 后复现：
+
+```bash
+ALEX_HERMES_PYTHON=/path/to/hermes/venv/bin/python \
+ALEX_CHROMIUM_PATH=/path/to/chromium \
+npm run demo:agent -- --output-dir /tmp/alex-agent-preview
+```
+
+脚本使用临时 HOME / HERMES_HOME、独立业务数据和模型客户端替身，不读取实际账号。GIF 的 HTML 帧展示实际回调输出；不是终端屏幕录像。上游精确版本和执行边界随 manifest 保存。
+
+GitHub Social preview 是仓库设置项，不随提交自动生效；README 已直接引用新横幅。下列旧素材保留作为 v0.2 功能记录。
+
+## v0.2 管理页面素材
 
 | 素材 | 用途 |
 | --- | --- |

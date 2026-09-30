@@ -1,0 +1,18 @@
+# 模型由 npm run alex -- model 在本独立 profile 中配置。
+plugins:
+  enabled: [alex]
+platform_toolsets:
+  cli: [alex, skills, memory, session_search, todo]
+  email: [alex, skills, memory, session_search, todo]
+  whatsapp: [alex, skills, memory, session_search, todo]
+  whatsapp_cloud: [alex, skills, memory, session_search, todo]
+  cron: [alex, skills, memory, session_search, todo]
+# 外发必须通过 Alex 账本；禁用可以改策略或绕过账本的通用执行/消息工具。
+# 定时安排由用户本机 `npm run alex -- cron ...` 管理，模型默认不能创建调度。
+agent:
+  disabled_toolsets: [terminal, file, code_execution, delegation, browser, messaging, connections, computer_use, desktop_ui, project, cronjob]
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+display:
+  skin: alex

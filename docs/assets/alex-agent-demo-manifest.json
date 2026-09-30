@@ -1,0 +1,304 @@
+{
+  "type": "controlled-agent-integration-fixture",
+  "label": "受控工具链验收 · 模型决定为脚本 Fixture",
+  "createdAt": "2026-09-30T12:47:27.014Z",
+  "width": 1100,
+  "height": 640,
+  "frameCount": 12,
+  "durationMs": 12600,
+  "actualAIAgentLoop": true,
+  "nativePluginLoader": true,
+  "realAlexHttpApi": true,
+  "realSqlitePersistence": true,
+  "modelMode": "scripted-openai-compatible-client-fixture",
+  "deterministicModelDecisions": true,
+  "realModelCalls": 0,
+  "publicAcquiredCustomers": 0,
+  "messagesSent": 0,
+  "sendAttempts": 0,
+  "productionWorkspaceUsed": false,
+  "hermesExternalNetworkBlocked": true,
+  "profileSurvivesServiceAndAgentRestart": true,
+  "sameDraftAfterRetry": true,
+  "draftCount": 1,
+  "hermesCommit": "0434a9a5ec743aed90cd5ac9a1ba872b4f2202af",
+  "registeredToolCount": 24,
+  "fixtureCompletionCalls": 12,
+  "assets": [
+    "alex-agent.gif"
+  ],
+  "source": "Actual AIAgent tool completion callbacks; HTML visualizes captured outputs, not live terminal video.",
+  "requirements": [
+    "Node.js >=24.5",
+    "npm ci",
+    "Chromium",
+    "ffmpeg",
+    "Installed Hermes Python environment"
+  ],
+  "reproduce": "ALEX_HERMES_PYTHON=/path/to/hermes/venv/bin/python ALEX_CHROMIUM_PATH=/path/to/chromium node scripts/alex-record-agent-demo.mjs --output-dir /tmp/alex-agent-preview",
+  "steps": [
+    {
+      "caption": "Alex · 外贸专家 Agent",
+      "durationMs": 1300
+    },
+    {
+      "caption": "从已保存资料开始",
+      "durationMs": 1000
+    },
+    {
+      "caption": "记住用户明确给出的业务",
+      "durationMs": 1000
+    },
+    {
+      "caption": "检查客户历史",
+      "durationMs": 1000
+    },
+    {
+      "caption": "检查持久任务",
+      "durationMs": 1000
+    },
+    {
+      "caption": "准备一封外联草稿",
+      "durationMs": 1000
+    },
+    {
+      "caption": "默认拒绝未授权外发",
+      "durationMs": 1000
+    },
+    {
+      "caption": "重启后继续记住业务",
+      "durationMs": 1000
+    },
+    {
+      "caption": "重试同一请求不重复创建",
+      "durationMs": 1000
+    },
+    {
+      "caption": "检查真实策略与发送次数",
+      "durationMs": 1000
+    },
+    {
+      "caption": "一份草稿，零次外发",
+      "durationMs": 1000
+    },
+    {
+      "caption": "执行可追溯，状态可继续",
+      "durationMs": 1300
+    }
+  ],
+  "trace": [
+    {
+      "at": "2026-09-30T12:47:21.273443+00:00",
+      "phase": "initial",
+      "tool": "alex_profile_get",
+      "arguments": {},
+      "result": {
+        "ok": true,
+        "result": {
+          "facts": {},
+          "version": 0,
+          "updatedAt": null
+        }
+      }
+    },
+    {
+      "at": "2026-09-30T12:47:21.292988+00:00",
+      "phase": "initial",
+      "tool": "alex_profile_update",
+      "arguments": {
+        "facts": {
+          "product": "精密加工刀具（演示资料）",
+          "market": "德国",
+          "customerType": "工业分销商"
+        }
+      },
+      "result": {
+        "ok": true,
+        "result": {
+          "facts": {
+            "product": "精密加工刀具（演示资料）",
+            "market": "德国",
+            "customerType": "工业分销商"
+          },
+          "version": 1,
+          "updatedAt": "2026-09-30T12:47:21.284Z"
+        }
+      }
+    },
+    {
+      "at": "2026-09-30T12:47:21.303297+00:00",
+      "phase": "initial",
+      "tool": "alex_customers_list",
+      "arguments": {
+        "includeArchived": true
+      },
+      "result": {
+        "ok": true,
+        "result": []
+      }
+    },
+    {
+      "at": "2026-09-30T12:47:21.312904+00:00",
+      "phase": "initial",
+      "tool": "alex_tasks_list",
+      "arguments": {},
+      "result": {
+        "ok": true,
+        "result": []
+      }
+    },
+    {
+      "at": "2026-09-30T12:47:21.423519+00:00",
+      "phase": "initial",
+      "tool": "alex_outreach_prepare",
+      "arguments": {
+        "channel": "gmail",
+        "recipient": "fixture@example.test",
+        "subject": "Fixture only — never send",
+        "body": "Controlled integration fixture. This is not customer outreach.",
+        "idempotencyKey": "alex-agent-demo-draft-v1"
+      },
+      "result": {
+        "ok": true,
+        "result": {
+          "id": "9dd17dd2-cc7c-47b3-adff-e27f413a14dc",
+          "idem_key": "alex-agent-demo-draft-v1",
+          "channel": "gmail",
+          "recipient": "fixture@example.test",
+          "subject": "Fixture only — never send",
+          "body": "Controlled integration fixture. This is not customer outreach.",
+          "company_id": null,
+          "status": "prepared",
+          "provider_message_id": null,
+          "provider_thread_id": null,
+          "error_code": null,
+          "created_at": "2026-09-30T12:47:21.384199+00:00",
+          "updated_at": "2026-09-30T12:47:21.384199+00:00",
+          "attempted_at": null,
+          "requires_review": false,
+          "receipt_scope": null
+        }
+      }
+    },
+    {
+      "at": "2026-09-30T12:47:21.432315+00:00",
+      "phase": "initial",
+      "tool": "alex_outreach_send",
+      "arguments": {
+        "deliveryId": "9dd17dd2-cc7c-47b3-adff-e27f413a14dc"
+      },
+      "result": {
+        "ok": false,
+        "code": "outreach_not_authorized",
+        "error": "The local CLI policy has not authorized this channel and exact recipient."
+      }
+    },
+    {
+      "at": "2026-09-30T12:47:24.318052+00:00",
+      "phase": "restart",
+      "tool": "alex_profile_get",
+      "arguments": {},
+      "result": {
+        "ok": true,
+        "result": {
+          "facts": {
+            "product": "精密加工刀具（演示资料）",
+            "market": "德国",
+            "customerType": "工业分销商"
+          },
+          "version": 1,
+          "updatedAt": "2026-09-30T12:47:21.284Z"
+        }
+      }
+    },
+    {
+      "at": "2026-09-30T12:47:24.327470+00:00",
+      "phase": "restart",
+      "tool": "alex_outreach_prepare",
+      "arguments": {
+        "channel": "gmail",
+        "recipient": "fixture@example.test",
+        "subject": "Fixture only — never send",
+        "body": "Controlled integration fixture. This is not customer outreach.",
+        "idempotencyKey": "alex-agent-demo-draft-v1"
+      },
+      "result": {
+        "ok": true,
+        "result": {
+          "id": "9dd17dd2-cc7c-47b3-adff-e27f413a14dc",
+          "idem_key": "alex-agent-demo-draft-v1",
+          "channel": "gmail",
+          "recipient": "fixture@example.test",
+          "subject": "Fixture only — never send",
+          "body": "Controlled integration fixture. This is not customer outreach.",
+          "company_id": null,
+          "status": "prepared",
+          "provider_message_id": null,
+          "provider_thread_id": null,
+          "error_code": null,
+          "created_at": "2026-09-30T12:47:21.384199+00:00",
+          "updated_at": "2026-09-30T12:47:21.384199+00:00",
+          "attempted_at": null,
+          "requires_review": false,
+          "receipt_scope": null
+        }
+      }
+    },
+    {
+      "at": "2026-09-30T12:47:24.336614+00:00",
+      "phase": "restart",
+      "tool": "alex_outreach_status",
+      "arguments": {},
+      "result": {
+        "ok": true,
+        "result": {
+          "policy": {
+            "version": 1,
+            "enabled": false,
+            "daily_limit": 0,
+            "allowed_recipients": {}
+          },
+          "attempts_today": 0,
+          "quota_timezone": "UTC",
+          "suppressions": [],
+          "remaining_today": 0,
+          "channels": {
+            "gmail": "Hermes Google Workspace OAuth; provider message ID required.",
+            "whatsapp": "Paired Hermes Baileys bridge; exact authorized recipients only.",
+            "whatsapp_cloud": "Connected Hermes gateway required. Text in existing customer service conversations only; no cold-start templates or delivery/read receipt integration."
+          },
+          "receipt_scope": "Provider acceptance only; delivery/read receipts are not integrated."
+        }
+      }
+    },
+    {
+      "at": "2026-09-30T12:47:24.345955+00:00",
+      "phase": "restart",
+      "tool": "alex_outreach_list",
+      "arguments": {},
+      "result": {
+        "ok": true,
+        "result": [
+          {
+            "id": "9dd17dd2-cc7c-47b3-adff-e27f413a14dc",
+            "idem_key": "alex-agent-demo-draft-v1",
+            "channel": "gmail",
+            "recipient": "fixture@example.test",
+            "subject": "Fixture only — never send",
+            "body": "Controlled integration fixture. This is not customer outreach.",
+            "company_id": null,
+            "status": "prepared",
+            "provider_message_id": null,
+            "provider_thread_id": null,
+            "error_code": null,
+            "created_at": "2026-09-30T12:47:21.384199+00:00",
+            "updated_at": "2026-09-30T12:47:21.384199+00:00",
+            "attempted_at": null,
+            "requires_review": false,
+            "receipt_scope": null
+          }
+        ]
+      }
+    }
+  ]
+}

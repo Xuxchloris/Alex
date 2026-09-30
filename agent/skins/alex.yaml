@@ -1,0 +1,20 @@
+name: alex
+description: Alex 外贸专家 Agent · 深海蓝与珊瑚橙
+colors:
+  banner_border: '#377C96'
+  banner_title: '#F27B62'
+  banner_accent: '#F27B62'
+  banner_dim: '#71909A'
+  banner_text: '#EAF4F4'
+  response_border: '#377C96'
+  ui_accent: '#F27B62'
+branding:
+  agent_name: Alex
+  welcome: 'Alex 外贸专家 Agent。告诉我你的产品、市场或当前要推进的客户。'
+  response_label: ' Alex '
+  prompt_symbol: '›'
+  help_header: 'Alex · 工具与命令'
+  goodbye: '客户与任务已保留，下次继续。'
+banner_logo: |
+  [#F27B62] A L E X [/]
+  [#EAF4F4]外贸专家 Agent[/]

@@ -1,0 +1,13 @@
+name: alex
+version: "0.3.0"
+description: "Alex 外贸专家 Agent：业务记忆、真实客户研究、邮箱与 WhatsApp 跟进"
+hermes_requires: ">=0.21.3"
+author: Xuxchloris
+license: MIT
+distribution_owned:
+  - distribution.yaml
+  - SOUL.md
+  - config.yaml
+  - skills
+  - plugins
+  - skins

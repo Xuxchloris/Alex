@@ -1,5 +1,25 @@
 # Alex 验收记录
 
+## v0.3：外贸专家 Agent
+
+验证日期：2026-09-30。Alex 以 Hermes 原生 profile distribution 运行，独立 SOUL、三项外贸技能、品牌皮肤与 24 项领域工具已安装到本机独立 profile。
+
+| 验证 | 实际结果 |
+| --- | --- |
+| 原生安装与更新 | Windows Hermes 0.21.3，提交 `db39ee3f2892185087bb2432eac242361056fc19`；官方 profile install / update 实际成功，重复 init 保留配置；未复制默认账号或会话 |
+| 插件注册 | 真实 PluginManager 注册 24 工具、行业技能，卸载清理与 Desktop surface 检查通过 |
+| 默认工具 | 实际 CLI 列表确认 alex、skills、memory、session_search、todo 启用；终端、文件与 cronjob 等关闭；定时任务由用户 CLI 配置 |
+| Node 测试 | Linux / WSL2 83/83，通过实际 Chromium、HTTP、SQLite、MCP、启动隔离和更新路径；旧 Node 11/11 |
+| Python 插件 | 40/40，包含 11 项业务 API 契约与 29 项邮箱、外发、退订、配额、幂等、并发、异常和备份测试 |
+| Python 全量兼容 | WSL2 `python -m pytest -q` 44/44，通过上述插件测试与 4 项旧 Python 测试 |
+| 实际 Agent 循环 | WSL 已安装 Hermes `0434a9a5ec743aed90cd5ac9a1ba872b4f2202af`，两次独立 AIAgent 进程共执行 10 次真实领域工具；重启后业务资料、草稿 ID 和唯一记录保持一致 |
+| 演示边界 | 模型决定为脚本 fixture，真实模型调用 0、生产客户 0、发送尝试 0；真实插件/API/SQLite 未替换；完整 trace 随 GIF 提交 |
+| 仓库信息 | About、主页链接与 Topics 已通过 GitHub API 更新并读回核验，README 使用新的专属图标、横幅和 Agent GIF |
+
+外发测试没有连接实际 Gmail/WhatsApp，也没有发送客户消息。本机独立 Agent 的模型与渠道仍待配置；公网获客尚未成功验收。Gmail 当前只发新邮件，没有同线程回复参数；Cloud 没有主动模板或投递/已读回执。业务 API 的模型配置状态属于可选管理页面规划器，不能代表 Hermes Agent 模型是否配置。
+
+Agent GIF 是实际工具回调的 HTML 可视化，不是终端录像；[核验清单](assets/alex-agent-demo-manifest.json)记录精确运行版本、输入与结果。GitHub Social preview 作为单独设置项，不能以 README 横幅或 git push 代替其上传验收。旧版本记录保留如下。
+
 ## Windows 本机 WSL2 交付
 
 验证日期：2026-09-30。已从 GitHub 临时分支恢复原始 v0.2 提交 `db242bda95c25e2622f56452cc4c54e75720abf2`，文件树为 `af0c369aafa184d6fd2c47890cbd38f98d5aaf94`，源码及图标、GIF、文档均已落到本机。仓库已实际重命名为 [Xuxchloris/Alex](https://github.com/Xuxchloris/Alex)。

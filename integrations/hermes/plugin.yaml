@@ -1,6 +1,6 @@
 name: alex
-version: "0.1.0"
-description: "Alex 智能外贸助手：持久业务记忆、真实客户研究与浏览器接管"
+version: "0.3.0"
+description: "Alex 外贸专家 Agent：业务记忆、真实研究、邮箱与 WhatsApp 工作流"
 author: Xuxchloris
 license: MIT
 kind: standalone
@@ -26,3 +26,10 @@ provides_tools:
   - alex_browser_navigate
   - alex_browser_action
   - alex_browser_extract
+  - alex_outreach_prepare
+  - alex_outreach_list
+  - alex_outreach_status
+  - alex_outreach_send
+  - alex_outreach_suppress
+  - alex_mailbox_search
+  - alex_mailbox_get

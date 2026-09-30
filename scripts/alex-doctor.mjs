@@ -66,7 +66,7 @@ export async function runDoctor({ env = process.env, url, healthOnly = false } =
     add('process_lock', flock.status === 0 ? 'ok' : 'error', flock.status === 0 ? 'flock 可用，数据目录可使用进程锁。' : '缺少 flock；请使用 Linux/WSL2（util-linux）或 Docker。');
     const executable = env.ALEX_CHROMIUM_PATH || ['/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome'].find(existsSync) || chromium.executablePath();
     const browser = spawnSync(executable, ['--version'], { timeout: 5000, encoding: 'utf8' });
-    const browserVersion = String(browser.stdout || '').match(/\b(?:Chromium|Google Chrome|Chrome) ([\d.]+)/);
+    const browserVersion = String(browser.stdout || '').match(/\b(?:Chromium|Google Chrome|Chrome)(?: for Testing)? ([\d.]+)/);
     add('chromium', browser.status === 0 && browserVersion ? 'ok' : 'error', browser.status === 0 && browserVersion ? `Chromium ${browserVersion[1]}` : 'Chromium 无法执行或版本无效；安装系统 Chromium 或设置 ALEX_CHROMIUM_PATH。');
     const directory = resolve(env.ALEX_DATA_DIR || join(root, 'work/alex'));
     try {

@@ -8,8 +8,8 @@ Alex v0.2 是一个单用户、持久数据的外贸工作台。日常运行建�
 
 | 环境 | 推荐路线 | 已验证与限制 |
 | --- | --- | --- |
-| Linux / WSL2 | Node.js 24.5+、Chromium、`util-linux` 的 `flock` | 原生服务和生命周期测试已在本轮 Linux 云环境执行；WSL2 单独启动未实测 |
-| Windows | Docker Desktop 的 Linux 容器，或 WSL2 中走 Linux 路线 | 提供容器配置；本轮未在 Windows 运行。原生 Windows Node 路线不受支持 |
+| Linux / WSL2 | Node.js 24.5+、Chromium、`util-linux` 的 `flock` | Linux 工程测试通过；Ubuntu 22.04 WSL2 已完成本机启动、浏览器、doctor、MCP 与备份恢复验收 |
+| Windows | Docker Desktop 的 Linux 容器，或 WSL2 中走 Linux 路线 | Windows 本机 WSL2 路线已验收；Docker 容器尚未验收。原生 Windows Node 路线不受支持 |
 | macOS | Docker Desktop 的 Linux 容器 | 提供容器配置；本轮未在 macOS 运行。原生 macOS 缺少本轮 Linux 锁机制 |
 | Linux VPS / 固定服务器 | 同一数据目录单实例，systemd 或 Docker；从本机用 SSH 隧道 | 提供 service 和 Compose 文件；本轮 systemd 实机服务安装未执行 |
 | Codex 云开发环境 | 当前 checkout 安装、工程测试和改代码 | 需要实际允许的出口和模型绑定；没有自动保证常驻、稳定公网地址或长期数据托管 |

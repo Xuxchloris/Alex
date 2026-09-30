@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import { spawn } from 'node:child_process';
-import { mkdtemp, rm, readdir } from 'node:fs/promises';
+import { mkdtemp, rm, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createAlexServer, startAlexServer } from '../../apps/alex/server.mjs';
@@ -95,6 +95,20 @@ test('doctor checks local API without environment proxy or redirect and never re
   assert.equal(isLocalPeer('8.8.8.8', '172.29.241.1'), false);
   assert.equal(isLocalPeer('::ffff:172.29.241.1', '172.29.241.1'), true);
   assert.equal(isLocalPeer('::ffff:127.0.0.1'), true);
+});
+
+test('doctor recognizes the official Playwright Chrome for Testing version output', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'alex-doctor-browser-'));
+  const executable = join(directory, 'chrome');
+  await writeFile(executable, "#!/bin/sh\nprintf 'Google Chrome for Testing 153.0.8010.12\\n'\n", { mode: 0o700 });
+  const server = http.createServer((_req, res) => res.end(JSON.stringify({ ok: true, product: 'Alex' })));
+  const base = await listen(server);
+  t.after(async () => { await new Promise(resolve => server.close(resolve)); await rm(directory, { recursive: true, force: true }); });
+  const report = await runDoctor({ env: { ALEX_CHROMIUM_PATH: executable }, url: base });
+  assert.equal(report.ok, true);
+  assert.deepEqual(report.checks.find(check => check.name === 'chromium'), {
+    name: 'chromium', status: 'ok', detail: 'Chromium 153.0.8010.12',
+  });
 });
 
 test('conversation HTTP routes require authentication and retain messages after restart', async t => {

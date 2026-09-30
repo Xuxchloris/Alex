@@ -1,6 +1,6 @@
 # Alex 本地开发与部署
 
-v0.2 完整运行方式见[部署指南](alex-deployment.md)，操作见[用户手册](alex-user-guide.md)，入口见[网关说明](alex-gateways.md)。原生运行需要 Linux/WSL2 的 `flock` 生命周期锁；Windows/macOS 使用 Docker Desktop。锁防止两个服务同时恢复或写入同一数据目录。
+v0.2 完整运行方式见[部署指南](alex-deployment.md)，操作见[用户手册](alex-user-guide.md)，入口见[网关说明](alex-gateways.md)。原生运行需要 Linux/WSL2 的 `flock` 生命周期锁；Windows 使用 WSL2 或 Docker Desktop，macOS 使用 Docker Desktop。锁防止两个服务同时恢复或写入同一数据目录。
 
 Alex v0.2 是本地单用户工作台。核心数据、浏览器和研究服务在一个 Node.js 进程内工作；Hermes 和 MCP 扩展通过本机 HTTP 调用。使用当前 checkout，不需要创建新的 Git worktree。
 

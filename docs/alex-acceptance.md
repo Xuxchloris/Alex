@@ -1,5 +1,22 @@
 # Alex 验收记录
 
+## Windows 本机 WSL2 交付
+
+验证日期：2026-09-30。已从 GitHub 临时分支恢复原始 v0.2 提交 `db242bda95c25e2622f56452cc4c54e75720abf2`，文件树为 `af0c369aafa184d6fd2c47890cbd38f98d5aaf94`，源码及图标、GIF、文档均已落到本机。仓库已实际重命名为 [Xuxchloris/Alex](https://github.com/Xuxchloris/Alex)。
+
+| 验证 | 本机实际结果 |
+| --- | --- |
+| 运行环境 | Ubuntu 22.04 WSL2、Node 24.21.0、Chromium / Chrome for Testing 153.0.8010.12；独立运行时安装，未替换默认 Node |
+| 工程测试 | lockfile `npm ci`、现有 Alex 75/75、旧 Node 11/11、Hermes Python 11/11、原 Python 4/4 通过，无跳过；测试使用独立临时数据 |
+| 诊断修复 | 修复官方 Playwright 浏览器 `Google Chrome for Testing` 版本输出被误报为不可用；新增回归与其余 runtime 测试合计 8/8 通过 |
+| 实际服务 | Windows 浏览器打开本机 `127.0.0.1:3210`；健康接口和 doctor 通过，浏览器已启动，业务数据位于 WSL 原生文件系统 |
+| 实际 MCP | 官方 SDK 客户端连通运行中的服务，列出 19 工具并读取真实健康状态；浏览器可用、模型未配置 |
+| 在线备份恢复 | 运行中创建一致性业务快照，恢复到独立空目录；SHA256、SQLite 完整性、资料、会话列表和客户数核对通过；没有向生产库写入测试客户 |
+
+真实公网验收仍未通过：在独立验收工作空间核验 `https://www.medline.com/`，实际任务返回 `unavailable` / `source_unavailable: Website could not be loaded.`，`actualCount=0`。通过本机代理重试的命令被自动审批拦截，未执行。生产客户数仍为 0；此连接检查不代表客户匹配或获客成果。
+
+`ALEX_LLM_API_KEY` 仍未配置。自然语言规划与模型回复、Google Maps / 海关专用适配器、Docker 容器、正式 systemd、macOS / Windows 原生后端、完整 Hermes Desktop 与消息平台仍未完成实际部署验收。以下云环境记录保留当时状态，WSL2 的新增验收以上表为准。
+
 ## v0.2：会话、网关与运行完善
 
 验证日期：2026-09-30。最终 lockfile 重装通过，Alex **75/75** 项测试通过，旧 Node 插件 **11/11**、Python **15/15** 项通过。

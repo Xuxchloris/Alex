@@ -84,6 +84,7 @@ export class BrowserController {
     this.tail = Promise.resolve();
     this.activeActor = null;
     this.starting = null;
+    this.closing = null;
     this.tempDataDir = false;
     this.proxyDnsRequired = false;
   }
@@ -142,6 +143,7 @@ export class BrowserController {
   }
 
   async start() {
+    if (this.closing) throw error('Browser is shutting down.', 'browser_closing', 503);
     if (this.context) return this.state();
     if (this.starting) return this.starting;
     this.starting = this._start();
@@ -367,15 +369,22 @@ export class BrowserController {
   }
 
   async close() {
+    if (this.closing) return this.closing;
     this.epoch += 1;
-    const context = this.context;
-    this.context = null;
-    this.page = null;
-    await context?.close().catch(() => {});
-    if (this.tempDataDir && this.dataDir) {
-      await rm(this.dataDir, { recursive: true, force: true });
-      this.dataDir = undefined;
-      this.tempDataDir = false;
-    }
+    this.closing = (async () => {
+      // A screenshot retry may be launching Chromium while the server starts shutting down.
+      if (this.starting) await this.starting.catch(() => {});
+      const context = this.context;
+      this.context = null;
+      this.page = null;
+      await context?.close().catch(() => {});
+      if (this.tempDataDir && this.dataDir) {
+        await rm(this.dataDir, { recursive: true, force: true });
+        this.dataDir = undefined;
+        this.tempDataDir = false;
+      }
+    })();
+    try { return await this.closing; }
+    finally { this.closing = null; }
   }
 }

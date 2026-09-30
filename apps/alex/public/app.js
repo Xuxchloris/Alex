@@ -1,6 +1,6 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-const state = { token: '', profile: { facts: {}, version: 0 }, capabilities: {}, companies: [], tasks: [], drafts: [], backups: [], browser: {}, plan: null, plannedRequest: '', tab: 'companies', refreshing: false, framePending: false, diagnostic: '', connected: false, submissionKey: null };
+const state = { token: '', profile: { facts: {}, version: 0 }, capabilities: {}, companies: [], tasks: [], drafts: [], backups: [], browser: {}, conversations: [], conversationId: '', messages: [], sendingMessage: false, switchingConversation: false, pendingMessage: null, plan: null, plannedRequest: '', tab: 'companies', refreshing: false, framePending: false, diagnostic: '', connected: false, submissionKey: null };
 const names = { companyName: '企业', product: '产品', market: '市场', customerType: '客户类型', notes: '补充要求' };
 const statuses = { queued: '等待开始', running: '正在研究', paused: '已暂停', completed: '研究完成', partial: '已获得部分结果', blocked: '访问受限', unavailable: '等待配置', failed: '执行遇到问题', cancelled: '已取消', pending: '待复核', approved: '已批准', rejected: '已退回' };
 const esc = value => String(value ?? '').replace(/[&<>"']/gu, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -174,6 +174,48 @@ async function refreshCompanies() {
   state.companies = await api(`/api/companies?${query}`);
   renderCompanies(); renderDrafts();
 }
+function renderConversationList() {
+  $('#conversation-select').innerHTML = state.conversations.length
+    ? state.conversations.map(item => `<option value="${esc(item.id)}">${esc(item.title || '外贸交流')} · ${Number(item.messageCount || 0)} 条</option>`).join('')
+    : '<option value="">第一次交流</option>';
+  $('#conversation-select').value = state.conversationId;
+}
+function renderMessages() {
+  const host = $('#conversation-messages');
+  host.innerHTML = state.messages.length ? state.messages.map(item => `<article class="conversation-message ${item.role === 'user' ? 'from-user' : 'from-alex'}"><div class="message-label">${item.role === 'user' ? '你' : 'Alex'}<time>${esc(safeDate(item.createdAt))}</time></div><p>${esc(item.content)}</p></article>`).join('')
+    : '<p class="muted">先说说你的业务。Alex 会读取记忆，再补充了解缺失的信息。</p>';
+  host.scrollTop = host.scrollHeight;
+}
+function clearProposal() {
+  state.plan = null; state.plannedRequest = ''; state.submissionKey = null;
+  $('#plan-result').innerHTML = ''; $('#plan-result').classList.add('hidden');
+}
+function setConversationControls(busy) {
+  for (const selector of ['#plan-button', '#new-conversation', '#conversation-select', '#request']) $(selector).disabled = busy;
+  if ($('#start-plan')) $('#start-plan').disabled = busy;
+}
+async function applyConversation(id) {
+  const messages = id ? await api(`/api/conversations/${encodeURIComponent(id)}/messages`) : [];
+  state.conversationId = id; state.pendingMessage = null; clearProposal(); $('#request').value = '';
+  state.messages = messages; renderMessages(); renderConversationList();
+  const latest = messages.at(-1);
+  if (latest?.role === 'assistant' && latest.plan) {
+    const request = messages.find(item => item.id === latest.replyTo)?.content || [...messages].reverse().find(item => item.role === 'user')?.content || '';
+    renderPlan(latest.plan, request, `conversation:${id}:${latest.id}`);
+  }
+}
+async function loadConversation(id) {
+  if (state.sendingMessage || state.switchingConversation) return;
+  state.switchingConversation = true; setConversationControls(true);
+  try { await applyConversation(id); }
+  finally { state.switchingConversation = false; setConversationControls(false); renderConversationList(); }
+}
+async function refreshConversations() {
+  state.conversations = await api('/api/conversations');
+  if (state.sendingMessage || state.switchingConversation) return;
+  if (!state.conversationId && state.conversations.length) await loadConversation(state.conversations[0].id);
+  renderConversationList();
+}
 async function refreshAll({ quiet = false } = {}) {
   if (!state.token || state.refreshing) return;
   state.refreshing = true;
@@ -181,7 +223,7 @@ async function refreshAll({ quiet = false } = {}) {
     ['profile', '/api/profile', renderProfile], ['tasks', '/api/tasks', renderTasks], ['drafts', '/api/drafts', renderDrafts], ['backups', '/api/backups', renderBackups], ['browser', '/api/browser/state', renderBrowser],
   ];
   const results = await Promise.allSettled(parts.map(async ([key, path, render]) => { state[key] = await api(path); render(); }));
-  const companyResult = await Promise.allSettled([refreshCompanies()]);
+  const companyResult = await Promise.allSettled([refreshCompanies(), refreshConversations()]);
   const failure = [...results, ...companyResult].find(result => result.status === 'rejected');
   connected(!failure);
   if (failure && !quiet) toast(humanError(failure.reason), true);
@@ -208,10 +250,10 @@ function profileEditor() {
   });
 }
 $('#edit-profile').addEventListener('click', profileEditor);
-function renderPlan(plan, request) {
+function renderPlan(plan, request, idempotencyKey) {
   state.plan = plan;
   state.plannedRequest = request;
-  state.submissionKey = crypto.randomUUID();
+  state.submissionKey = idempotencyKey || crypto.randomUUID();
   const host = $('#plan-result');
   host.classList.remove('hidden');
   if (plan.status === 'unavailable') {
@@ -221,26 +263,59 @@ function renderPlan(plan, request) {
   }
   const missing = plan.missing || [];
   const criteria = plan.criteria || {};
-  host.innerHTML = `<h3>${missing.length ? '先了解你的业务' : '这次的研究方案'}</h3><div class="plan-criteria">${['product', 'market', 'customerType'].filter(key => criteria[key]).map(key => `<span class="chip">${esc(names[key])} · ${esc(criteria[key])}</span>`).join('')}</div>${missing.length ? `<div class="plan-questions"><strong>请补充以下信息：</strong>${(plan.questions?.length ? plan.questions : missing.map(key => `你的${names[key] || key}是什么？`)).map(question => `<p>${esc(question)}</p>`).join('')}</div><p>补充到上方任务描述，重新制定方案。你明确介绍的业务资料会存入记忆。</p>` : `<ul>${(plan.plan || []).map(step => `<li>${esc(step)}</li>`).join('')}</ul><p>目标数量：${Number(criteria.count || 5)} 家；以实际核验结果为准。</p><button class="button primary" id="start-plan" type="button">按方案开始研究 →</button>`}`;
-  if (!missing.length) $('#start-plan').addEventListener('click', event => perform(event.target, () => createTask({ request: state.plannedRequest, criteria, idempotencyKey: state.submissionKey })));
+  host.innerHTML = `<h3>${missing.length ? '先了解你的业务' : '这次的研究方案'}</h3><div class="plan-criteria">${['product', 'market', 'customerType'].filter(key => criteria[key]).map(key => `<span class="chip">${esc(names[key])} · ${esc(criteria[key])}</span>`).join('')}</div>${missing.length ? `<div class="plan-questions"><strong>请补充以下信息：</strong>${(plan.questions?.length ? plan.questions : missing.map(key => `你的${names[key] || key}是什么？`)).map(question => `<p>${esc(question)}</p>`).join('')}</div><p>继续回复即可补充；临时任务要求与长期业务资料分别保存。</p>` : `<ul>${(plan.plan || []).map(step => `<li>${esc(step)}</li>`).join('')}</ul><p>目标数量：${Number(criteria.count || 5)} 家；以实际核验结果为准。</p><button class="button primary" id="start-plan" type="button">执行此方案 →</button>`}`;
+  if (!missing.length) {
+    const snapshot = { request, criteria: structuredClone(criteria), idempotencyKey: state.submissionKey };
+    $('#start-plan').disabled = state.sendingMessage || state.switchingConversation;
+    $('#start-plan').addEventListener('click', event => {
+      if (state.sendingMessage || state.switchingConversation) return;
+      perform(event.target, () => createTask(snapshot));
+    });
+  }
 }
 $('#plan-form').addEventListener('submit', event => {
   event.preventDefault();
+  if (state.sendingMessage || state.switchingConversation) return;
   const request = $('#request').value.trim();
   if (!request) return;
   perform($('#plan-button'), async () => {
-    const plan = await api('/api/plan', { request });
-    if ($('#request').value.trim() === request) renderPlan(plan, request);
-    else invalidatePlan();
-    state.profile = await api('/api/profile'); renderProfile();
+    state.sendingMessage = true;
+    setConversationControls(true);
+    clearProposal();
+    try {
+      if (!state.conversationId) {
+        const conversation = await api('/api/conversations', {});
+        state.conversationId = conversation.id;
+      }
+      const id = state.conversationId;
+      if (!state.pendingMessage || state.pendingMessage.content !== request || state.pendingMessage.id !== id) state.pendingMessage = { id, content: request, key: crypto.randomUUID() };
+      const reply = await api(`/api/conversations/${encodeURIComponent(id)}/messages`, { content: request, idempotencyKey: state.pendingMessage.key });
+      state.messages = await api(`/api/conversations/${encodeURIComponent(id)}/messages`); renderMessages();
+      if (reply.plan) renderPlan(reply.plan, request, `conversation:${id}:${reply.assistantMessage?.id || reply.userMessage.id}`);
+      if (['unavailable', 'failed'].includes(reply.status)) toast(humanError({ code: reply.code || 'model_unavailable', message: reply.message }), true);
+      else { $('#request').value = ''; state.pendingMessage = null; }
+      state.profile = await api('/api/profile'); renderProfile();
+      await refreshConversations();
+    } finally {
+      state.sendingMessage = false;
+      setConversationControls(false); renderConversationList();
+      $('#request').focus();
+    }
   });
 });
-function invalidatePlan() {
-  state.plan = null;
-  $('#plan-result').classList.remove('hidden');
-  $('#plan-result').innerHTML = '<p>任务目标已更新，请重新制定方案后再开始。</p>';
-}
-$('#request').addEventListener('input', () => { if (!$('#plan-result').classList.contains('hidden') && $('#request').value.trim() !== state.plannedRequest) invalidatePlan(); });
+$('#conversation-select').addEventListener('change', event => perform(null, () => loadConversation(event.target.value)));
+$('#new-conversation').addEventListener('click', event => perform(event.target, async () => {
+  if (state.sendingMessage || state.switchingConversation) return;
+  state.switchingConversation = true; setConversationControls(true);
+  try {
+    const conversation = await api('/api/conversations', {});
+    state.conversations = await api('/api/conversations');
+    await applyConversation(conversation.id); $('#request').focus();
+  } finally { state.switchingConversation = false; setConversationControls(false); renderConversationList(); }
+}));
+$('#help-button').addEventListener('click', () => {
+  modal('从第一次交流到下次继续', `<p class="modal-description">你的目标决定研究方向。对话、任务与客户分别存档，重启后读取同一工作空间继续。</p><ol class="guide-steps"><li><strong>介绍业务。</strong>告诉 Alex 产品、市场与客户类型。信息不足时继续回复；需要长期记住的资料，请明确说明或在“我的业务记忆”中保存。</li><li><strong>核对方案。</strong>确认数量和筛选条件后，点击“执行此方案”。也可以直接填写条件或提供已知官网。</li><li><strong>核对发现。</strong>查看客户的官网、时间、原文证据与联系方式。数量不足、访问失败或需要复核都会保留实际状态。</li><li><strong>接着做。</strong>选择历史会话继续交流；在任务列表恢复同一个任务。需要操作网页时先接管，完成后交还浏览器。</li><li><strong>留存资产。</strong>归档客户仍参与查重。导出 CSV、创建备份，并把备份副本另存到独立存储。</li></ol><p class="panel-note">缺少模型凭据时，对话可存档但不会伪造回复；可先使用结构化条件和浏览器。当前开发信只用于准备及复核。</p><div class="form-actions"><button class="button primary" data-close-modal type="button">开始使用</button></div>`);
+});
 async function createTask(payload) {
   const task = await api('/api/tasks', payload);
   state.tasks = await api('/api/tasks'); renderTasks(); setTab('tasks');

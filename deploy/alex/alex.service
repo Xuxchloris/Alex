@@ -1,0 +1,29 @@
+[Unit]
+Description=Alex intelligent foreign trade assistant
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=alex
+Group=alex
+WorkingDirectory=/opt/alex
+EnvironmentFile=/etc/alex/alex.env
+Environment=ALEX_DATA_DIR=/var/lib/alex
+Environment=ALEX_BIND_HOST=127.0.0.1
+ExecStart=/usr/bin/node --use-env-proxy /opt/alex/apps/alex/server.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=45
+KillMode=control-group
+StateDirectory=alex
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/alex
+
+[Install]
+WantedBy=multi-user.target

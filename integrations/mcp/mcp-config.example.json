@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "alex": {
+      "command": "node",
+      "args": ["/absolute/path/to/Alex/services/alex-mcp/index.mjs"],
+      "env": {
+        "ALEX_API_URL": "http://127.0.0.1:3210",
+        "ALEX_API_TOKEN_FILE": "/absolute/path/to/Alex/work/alex/api-token"
+      }
+    }
+  }
+}

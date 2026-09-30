@@ -93,11 +93,15 @@ export class TradeStore {
       CREATE TABLE IF NOT EXISTS companies (id TEXT PRIMARY KEY, workspace TEXT NOT NULL, record TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS identities (workspace TEXT NOT NULL, kind TEXT NOT NULL, value TEXT NOT NULL, company_id TEXT NOT NULL REFERENCES companies(id), PRIMARY KEY(workspace,kind,value));
       CREATE TABLE IF NOT EXISTS drafts (id TEXT PRIMARY KEY, workspace TEXT NOT NULL, record TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS conversations (id TEXT PRIMARY KEY, workspace TEXT NOT NULL, record TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS messages (sequence INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE, workspace TEXT NOT NULL, conversation_id TEXT NOT NULL REFERENCES conversations(id), idem_key TEXT, input_hash TEXT NOT NULL, record TEXT NOT NULL, UNIQUE(workspace,conversation_id,idem_key));
       CREATE TABLE IF NOT EXISTS events (sequence INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE, workspace TEXT NOT NULL, task_id TEXT, record TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS companies_workspace ON companies(workspace);
       CREATE INDEX IF NOT EXISTS tasks_workspace ON tasks(workspace);
       CREATE INDEX IF NOT EXISTS events_task ON events(workspace,task_id,sequence);
-      PRAGMA user_version=1;`);
+      CREATE INDEX IF NOT EXISTS conversations_workspace ON conversations(workspace);
+      CREATE INDEX IF NOT EXISTS messages_conversation ON messages(workspace,conversation_id,sequence);
+      PRAGMA user_version=2;`);
     this.closed = false;
   }
   transaction(fn) {
@@ -305,8 +309,68 @@ export class TradeStore {
     const rows = taskId ? this.db.prepare('SELECT sequence,record FROM events WHERE workspace=? AND task_id=? ORDER BY sequence').all(this.workspaceId, taskId) : this.db.prepare('SELECT sequence,record FROM events WHERE workspace=? ORDER BY sequence').all(this.workspaceId);
     return rows.map((row) => ({ ...decode(row.record), sequence: row.sequence }));
   }
+  createConversation({ title = '新会话' } = {}) {
+    title = string(title, 'Conversation title', true, 200);
+    const record = { id: randomUUID(), title, messageCount: 0, createdAt: now(), updatedAt: now() };
+    this.db.prepare('INSERT INTO conversations VALUES(?,?,?)').run(record.id, this.workspaceId, json(record));
+    return record;
+  }
+  getConversation(id) {
+    const row = this.db.prepare('SELECT record FROM conversations WHERE workspace=? AND id=?').get(this.workspaceId, string(id, 'Conversation ID'));
+    if (!row) fail('Conversation not found', 'not_found', 404);
+    return decode(row.record);
+  }
+  listConversations() {
+    return this.db.prepare('SELECT record FROM conversations WHERE workspace=? ORDER BY rowid DESC').all(this.workspaceId).map(row => decode(row.record)).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  }
+  listMessages(conversationId, { limit = 100 } = {}) {
+    this.getConversation(conversationId);
+    if (!Number.isInteger(limit) || limit < 1 || limit > 500) fail('Message limit must be an integer between 1 and 500');
+    return this.db.prepare('SELECT sequence,record FROM messages WHERE workspace=? AND conversation_id=? ORDER BY sequence DESC LIMIT ?').all(this.workspaceId, conversationId, limit).reverse().map(row => ({ ...decode(row.record), sequence: row.sequence }));
+  }
+  getMessageByIdempotencyKey(conversationId, idempotencyKey) {
+    this.getConversation(conversationId);
+    string(idempotencyKey, 'Message idempotencyKey', true, 500);
+    const row = this.db.prepare('SELECT sequence,record FROM messages WHERE workspace=? AND conversation_id=? AND idem_key=?').get(this.workspaceId, conversationId, idempotencyKey);
+    return row ? { ...decode(row.record), sequence: row.sequence } : null;
+  }
+  appendMessage(conversationId, { role, content, status = 'saved', plan = null, references = {}, replyTo = null, idempotencyKey } = {}) {
+    if (!['user', 'assistant'].includes(role)) fail('Conversation role must be user or assistant');
+    content = string(content, 'Message content', true, role === 'user' ? 12_000 : 20_000);
+    if (!['saved', 'ready', 'needs_input', 'unavailable', 'failed'].includes(status)) fail('Invalid conversation message status');
+    if (plan !== null) object(plan, 'Message plan');
+    object(references, 'Message references');
+    if (Object.keys(references).some(key => !['taskIds', 'companyIds'].includes(key))) fail('Invalid message reference type');
+    for (const [key, method] of [['taskIds', 'getTask'], ['companyIds', 'getCompany']]) {
+      if (references[key] !== undefined && (!Array.isArray(references[key]) || references[key].length > 20 || references[key].some(id => typeof id !== 'string'))) fail('Invalid message references');
+      for (const id of references[key] || []) this[method](id);
+    }
+    if (idempotencyKey !== undefined) string(idempotencyKey, 'Message idempotencyKey', true, 500);
+    if (replyTo !== null) {
+      string(replyTo, 'Reply message ID');
+      const parent = this.db.prepare('SELECT record FROM messages WHERE workspace=? AND conversation_id=? AND id=?').get(this.workspaceId, conversationId, replyTo);
+      if (!parent || decode(parent.record).role !== 'user' || role !== 'assistant') fail('Reply must reference a user message in the same conversation', 'not_found', 404);
+    }
+    const inputHash = hash(canonical({ role, content, status, plan, references, replyTo }));
+    return this.transaction(() => {
+      const conversation = this.getConversation(conversationId);
+      if (idempotencyKey) {
+        const existing = this.db.prepare('SELECT sequence,record,input_hash FROM messages WHERE workspace=? AND conversation_id=? AND idem_key=?').get(this.workspaceId, conversationId, idempotencyKey);
+        if (existing) {
+          if (existing.input_hash !== inputHash) fail('Message idempotency key belongs to different content', 'idempotency_conflict', 409);
+          return { ...decode(existing.record), sequence: existing.sequence };
+        }
+      }
+      const record = { id: randomUUID(), conversationId, role, content, status, plan, references, replyTo, idempotencyKey: idempotencyKey || null, createdAt: now() };
+      const inserted = this.db.prepare('INSERT INTO messages(id,workspace,conversation_id,idem_key,input_hash,record) VALUES(?,?,?,?,?,?)').run(record.id, this.workspaceId, conversationId, idempotencyKey || null, inputHash, json(record));
+      const title = conversation.title === '新会话' && role === 'user' ? content.replace(/\s+/g, ' ').slice(0, 60) : conversation.title;
+      const updated = { ...conversation, title, messageCount: conversation.messageCount + 1, updatedAt: now() };
+      this.db.prepare('UPDATE conversations SET record=? WHERE workspace=? AND id=?').run(json(updated), this.workspaceId, conversationId);
+      return { ...record, sequence: Number(inserted.lastInsertRowid) };
+    });
+  }
   async backup(directory) {
-    const otherWorkspace = ['profiles', 'profile_history', 'companies', 'tasks', 'memories', 'drafts', 'events', 'identities'].some((table) => this.db.prepare(`SELECT 1 FROM ${table} WHERE workspace<>? LIMIT 1`).get(this.workspaceId));
+    const otherWorkspace = ['profiles', 'profile_history', 'companies', 'tasks', 'memories', 'drafts', 'events', 'identities', 'conversations', 'messages'].some((table) => this.db.prepare(`SELECT 1 FROM ${table} WHERE workspace<>? LIMIT 1`).get(this.workspaceId));
     if (otherWorkspace) fail('A database-wide backup requires a single configured workspace', 'backup_scope_conflict', 409);
     const createdAt = now();
     const destination = join(resolve(string(directory, 'Backup directory')), `${createdAt.replace(/[:.]/g, '-')}-${randomUUID().slice(0, 8)}`);
@@ -319,8 +383,8 @@ export class TradeStore {
     let counts;
     try {
       if (snapshot.prepare('PRAGMA integrity_check').get().integrity_check !== 'ok') fail('Backup integrity check failed', 'backup_error', 500);
-      counts = Object.fromEntries(['companies', 'tasks', 'memories', 'drafts', 'events', 'profile_history'].map((table) => [table, snapshot.prepare(`SELECT count(*) AS total FROM ${table} WHERE workspace=?`).get(this.workspaceId).total]));
-      const workspaces = snapshot.prepare('SELECT DISTINCT workspace FROM profiles UNION SELECT DISTINCT workspace FROM companies UNION SELECT DISTINCT workspace FROM tasks UNION SELECT DISTINCT workspace FROM memories').all();
+      counts = Object.fromEntries(['companies', 'tasks', 'memories', 'drafts', 'events', 'profile_history', 'conversations', 'messages'].map((table) => [table, snapshot.prepare(`SELECT count(*) AS total FROM ${table} WHERE workspace=?`).get(this.workspaceId).total]));
+      const workspaces = snapshot.prepare('SELECT DISTINCT workspace FROM profiles UNION SELECT DISTINCT workspace FROM companies UNION SELECT DISTINCT workspace FROM tasks UNION SELECT DISTINCT workspace FROM memories UNION SELECT DISTINCT workspace FROM conversations UNION SELECT DISTINCT workspace FROM messages UNION SELECT DISTINCT workspace FROM events UNION SELECT DISTINCT workspace FROM drafts UNION SELECT DISTINCT workspace FROM profile_history UNION SELECT DISTINCT workspace FROM identities').all();
       // This is a local deployment snapshot. Never label a database containing multiple
       // workspaces as one isolated workspace backup.
       if (workspaces.some((row) => row.workspace !== this.workspaceId)) fail('A database-wide backup requires a single configured workspace', 'backup_scope_conflict', 409);

@@ -198,3 +198,13 @@ test('agent browser transport rejects POST while human takeover can submit an in
   await browser.page.waitForURL(`${f.url}/submit`);
   assert.equal(f.methods.some(request => request.url === '/submit' && request.method === 'POST'), true);
 });
+
+test('closing while Chromium starts reclaims the newly launched context', async () => {
+  const browser = new BrowserController();
+  const started = browser.start();
+  const closed = browser.close();
+  await Promise.allSettled([started, closed]);
+  assert.equal(browser.state().available, false);
+  assert.equal(browser.context, null);
+  assert.equal(browser.dataDir, undefined);
+});

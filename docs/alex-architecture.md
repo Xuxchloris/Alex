@@ -8,6 +8,9 @@ Alex 是用户目标驱动的智能外贸助手。产品、市场、客户类型
 flowchart TD
   UI[Alex 工作台] --> API[本机业务 API]
   H[Hermes 外贸插件] --> API
+  MCP[MCP stdio 网关] --> API
+  API --> C[持久会话与研究提案]
+  C --> R
   API --> R[研究执行器：规划、发现、核验、恢复]
   R --> B[独立 Chromium 会话]
   UI --> V[同会话实际画面与人工输入]
@@ -24,6 +27,8 @@ flowchart TD
 | 持久化核心 | `packages/alex-core/` | 事务、稳定客户 ID、去重、历史、任务检查点、审批与审计 |
 | 浏览器 | `services/alex-browser/` | 真实 Chromium、页面抽取、画面、输入、控制权与公网地址限制 |
 | 研究执行器 | `services/alex-research/` | OpenAI-compatible 模型规划、真实来源发现、逐条官网核验与暂停恢复 |
+| 业务会话 | `services/alex-conversation/` | 多轮归档、上下文续接、幂等回复、明确长期资料与待执行提案 |
+| MCP 网关 | `services/alex-mcp/` | 标准 stdio、19 个工具、同一本机 API 与内部令牌读取 |
 | Hermes 扩展 | `integrations/hermes/` | 固定接口调用 Alex 业务服务，复用 Hermes Agent |
 | 行业方法 | `skills/alex/` | 长期记忆读取、来源核验、去重、结果复核的可迭代技能 |
 | 兼容入口 | `packages/dsh-sdr/`、`app/` | 原有 DSH 插件与 Python 实现保留 |
@@ -31,6 +36,8 @@ flowchart TD
 ## 长期记忆与客户资产
 
 业务数据库是事实与任务进度的来源。企业资料与偏好保存历史版本，任务保存运行要求与检查点，客户保存来源观察、联系人和归档状态。Hermes 的聊天和 memory 可辅助检索，不能代替这些档案。
+
+Web 会话和消息也保存在业务数据库；规划读取历史，但最新用户原文才可授权自动长期资料更新。临时或否定语境不能由模型裁掉前缀后变成保存指令。研究提案与执行分开，用户明确点击才创建任务。Hermes 自身平台对话仍由 Hermes 管理，不声称自动复制到 Web 会话。
 
 客户主键是稳定随机 ID。可靠来源标识和经过核验的身份关联帮助去重；补充网站不会生成新的主键。模糊同名、集团共享域名或公共邮箱不能作为无条件合并依据。归档只改变默认列表可见性，仍参与查重。
 

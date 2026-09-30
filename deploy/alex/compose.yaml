@@ -1,0 +1,37 @@
+services:
+  alex:
+    build:
+      context: ../..
+      dockerfile: deploy/alex/Dockerfile
+    image: alex-trade-assistant:local
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${ALEX_PORT:-3210}:3210"
+    environment:
+      ALEX_PORT: "3210"
+      ALEX_DATA_DIR: /data/alex
+      ALEX_BIND_HOST: 0.0.0.0
+      ALEX_LOCAL_PROXY_IP: ${ALEX_DOCKER_GATEWAY:-172.29.241.1}
+      ALEX_LLM_BASE_URL: ${ALEX_LLM_BASE_URL:-https://api.deepseek.com/v1}
+      ALEX_LLM_MODEL: ${ALEX_LLM_MODEL:-deepseek-chat}
+      ALEX_LLM_API_KEY: ${ALEX_LLM_API_KEY:-}
+      ALEX_API_TOKEN: ${ALEX_API_TOKEN:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      NO_PROXY: localhost,127.0.0.1,::1
+    volumes:
+      - alex-data:/data/alex
+    shm_size: 256mb
+    stop_grace_period: 45s
+    networks:
+      - alex-local
+volumes:
+  alex-data:
+networks:
+  alex-local:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${ALEX_DOCKER_SUBNET:-172.29.241.0/24}
+          gateway: ${ALEX_DOCKER_GATEWAY:-172.29.241.1}

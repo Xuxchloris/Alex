@@ -1,0 +1,70 @@
+{
+  "type": "controlled-functional-demo",
+  "label": "功能演示 · 测试网站（非真实获客数据）",
+  "frameCount": 12,
+  "durationMs": 11150,
+  "width": 1000,
+  "height": 750,
+  "customerCountAfterRepeatedResearch": 1,
+  "stableCustomerIdentityVerified": true,
+  "archivedIdentityPreserved": true,
+  "profileSurvivesReload": true,
+  "browserClickVerified": true,
+  "modelCalls": 0,
+  "productionWorkspaceUsed": false,
+  "assets": [
+    "alex-workbench.gif",
+    "alex-workbench-cover.png",
+    "alex-workbench-contactsheet.png"
+  ],
+  "steps": [
+    {
+      "caption": "01 / 你的业务资料，由用户首次定义",
+      "durationMs": 700
+    },
+    {
+      "caption": "01 / 保存用户明确填写的业务资料，后续任务继续读取",
+      "durationMs": 950
+    },
+    {
+      "caption": "01 / 业务记忆已保存，首次了解后可继续使用",
+      "durationMs": 650
+    },
+    {
+      "caption": "02 / 填写本次条件，提供受控测试网站地址",
+      "durationMs": 900
+    },
+    {
+      "caption": "03 / 实际访问测试网站，读取网页并保存来源证据",
+      "durationMs": 1200
+    },
+    {
+      "caption": "04 / 客户档案附带网页正文、读取时间与公开测试联系方式",
+      "durationMs": 1150
+    },
+    {
+      "caption": "05 / 归档保留历史，仍参加后续查重",
+      "durationMs": 750
+    },
+    {
+      "caption": "05 / 再次核验同一网站：仍是一份档案，不重复新增",
+      "durationMs": 1100
+    },
+    {
+      "caption": "06 / 创建本机备份，保存客户、记忆、任务与证据",
+      "durationMs": 1050
+    },
+    {
+      "caption": "07 / 接管正在使用的同一个浏览器，亲自继续操作",
+      "durationMs": 850
+    },
+    {
+      "caption": "07 / 画面上的点击已在实际测试网页生效",
+      "durationMs": 1000
+    },
+    {
+      "caption": "08 / 交还控制权，记忆、档案和备份留在工作空间",
+      "durationMs": 850
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# Alex v0.1 integration contract
+# Alex v0.2 integration contract
 
 Local single-user app. Identity is a configured workspace, never an arbitrary request header/body workspace ID. All mutations require server-generated session token or ALEX_API_TOKEN; server binds loopback by default. Existing DSH/Python remain compatible. No production multi-tenant claim.
 
@@ -49,3 +49,23 @@ Local single-user app. Identity is a configured workspace, never an arbitrary re
 `POST /api/companies/:id/draft` generates a pending draft; `GET /api/agent/browser/extract` and `POST /api/agent/browser/navigate|action` require agent ownership. Agent-owned browser transport permits GET/HEAD requests only; intentional form submission requires human takeover.
 
 Mutating calls include `X-Alex-Token`. Errors JSON `{error,code}`. All lists return arrays. Poll UI allowed; screenshot reflects same controlled Chromium instance. Browser URL changes only after actual navigation succeeds. Don't claim live capabilities when unavailable.
+
+## Conversations and gateway (v0.2)
+
+`TradeStore` additionally provides `createConversation({title?})`, `getConversation(id)`, `listConversations()`, `listMessages(id,{limit=100})` and validated message persistence. Conversations/messages share the configured workspace and participate in backup scope checks, snapshot counts and restore. Database schema version 2 adds tables without clearing v0.1 data; manifest format remains version 1.
+
+`ConversationService({store,runner}).send(conversationId,{content,idempotencyKey?})` returns `{conversation,userMessage,assistantMessage,plan,status,code?,message?}`. Status is `ready`, `needs_input`, `unavailable` or `failed`. Unavailable/failed turns preserve the actual user message without fabricating an assistant reply. Accepted turns are serialized and an idempotent retry reuses its saved response. `close()` aborts the current model call and drains accepted turns.
+
+`ResearchRunner.plan(request,{history=[],previousCriteria=null,signal}={})` keeps the current user request separate from history. Only current explicit permanent intent may change long-term profile; historical assistant text cannot authorize source URLs. Prior user-provided URLs may be continued. Planning never creates tasks or browses.
+
+Authenticated HTTP routes:
+
+- `GET /api/conversations`, `GET /api/conversations/:id`, `GET /api/conversations/:id/messages`.
+- `POST /api/conversations` with `{title?}`.
+- `POST /api/conversations/:id/messages` with `{content,idempotencyKey?}`.
+
+The UI binds execution to an immutable saved proposal and stable reply-based task key. Sending or switching conversations prevents overlapping UI submission or execution.
+
+The standard MCP stdio entry is `services/alex-mcp/index.mjs`, implemented using the official SDK. It exposes 19 tools: the 17 Hermes business tools plus health and task cancellation. Its private loopback API client reads a protected token file, bypasses environment proxies, rejects redirects and redacts credential echoes. No separate store, bootstrap access, draft approval, messaging, backup restoration or human-control lease tool. Direct `node` startup or `npm run --silent gateway:mcp` preserves protocol-only stdout.
+
+The Linux/WSL2 service holds a `flock` lifecycle lock before opening the business store or recovering tasks. Unexpected lock loss closes the service. Container bind/proxy configuration and private access examples are documented under `deploy/alex/` and `docs/alex-deployment.md`.

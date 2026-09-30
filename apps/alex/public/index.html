@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#164b41">
   <title>Alex · 智能外贸助手</title>
-  <link rel="icon" type="image/svg+xml" href="/alex.svg">
+  <link rel="icon" type="image/png" href="/alex-logo.png">
   <link rel="stylesheet" href="/styles.css">
   <script type="module" src="/app.js"></script>
 </head>
 <body>
   <header class="app-header">
-    <a class="brand" href="/" aria-label="Alex 首页"><img src="/alex.svg" width="42" height="42" alt=""><span><strong>Alex<span class="brand-dot">.</span></strong><small>智能外贸助手</small></span></a>
+    <a class="brand" href="/" aria-label="Alex 首页"><img src="/alex-logo.png" width="42" height="42" alt=""><span><strong>Alex<span class="brand-dot">.</span></strong><small>智能外贸助手</small></span></a>
     <div class="header-center"><span class="status-dot" id="connection-dot"></span><span id="connection-label">正在连接工作空间</span></div>
-    <button class="button quiet" id="settings-button" type="button">工作空间设置 <span aria-hidden="true">↗</span></button>
+    <div class="header-actions"><button class="button quiet" id="help-button" type="button">操作指南</button><button class="button quiet" id="settings-button" type="button">工作空间设置 <span aria-hidden="true">↗</span></button></div>
   </header>
 
   <main class="workspace">
@@ -26,18 +26,21 @@
       </section>
 
       <section class="card composer-card">
-        <div class="section-heading"><h2>开始一个任务</h2><span class="subtle-label">由你的目标出发</span></div>
+        <div class="section-heading"><h2>与 Alex 继续聊</h2><button class="text-button" id="new-conversation" type="button">新会话 ＋</button></div>
+        <label class="sr-only" for="conversation-select">选择历史会话</label>
+        <select id="conversation-select" class="conversation-select" aria-label="选择历史会话"><option value="">第一次交流</option></select>
+        <div id="conversation-messages" class="conversation-messages" role="log" aria-live="polite" aria-label="已存档的对话"><p class="muted">先说说你的业务。Alex 会读取记忆，再补充了解缺失的信息。</p></div>
         <form id="plan-form">
           <label class="sr-only" for="request">向 Alex 描述你的任务</label>
-          <textarea id="request" name="request" rows="5" maxlength="10000" placeholder="介绍你的产品、目标市场和客户类型，或者说说这次想完成什么…" required></textarea>
-          <div class="composer-footer"><span>读取历史资料，延续你的工作</span><button class="button primary" id="plan-button" type="submit">制定方案 <span aria-hidden="true">↗</span></button></div>
+          <textarea id="request" name="request" rows="3" maxlength="10000" placeholder="说说你的产品，或补充上一轮的问题…" required></textarea>
+          <div class="composer-footer"><span>对话会存档，下次可以继续</span><button class="button primary" id="plan-button" type="submit">发送 <span aria-hidden="true">↗</span></button></div>
         </form>
         <p class="inline-note hidden" id="model-notice"></p>
         <button class="text-button secondary-link" id="structured-open" type="button">直接填写筛选条件 / 核验官网</button>
         <div id="plan-result" class="plan-result hidden" aria-live="polite"></div>
       </section>
       <section class="small-note"><span class="note-symbol" aria-hidden="true">◎</span><p>发现结果附带来源。已存档客户继续参加查重，后续任务可从历史进度继续。</p></section>
-      <div class="column-bottom"><button class="text-button" id="memories-button" type="button">查看记忆与存档 <span aria-hidden="true">→</span></button><span>Alex · v0.1</span></div>
+      <div class="column-bottom"><button class="text-button" id="memories-button" type="button">查看记忆与存档 <span aria-hidden="true">→</span></button><span>Alex · v0.2</span></div>
     </aside>
 
     <section class="browser-column card">

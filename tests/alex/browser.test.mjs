@@ -131,8 +131,11 @@ test('private subresources are rejected and popups cannot create a second contro
   await browser.page.waitForFunction(() => window.assetBlocked === true);
   assert.ok(checked.includes('http://169.254.169.254/latest/meta-data/'));
   assert.ok(checked.includes('http://10.1.2.3/'));
-  await browser.page.locator('#popup').click();
-  await new Promise(resolve => setTimeout(resolve, 100));
+  // Closing a Chromium target is asynchronous; CI can take longer than 100 ms.
+  // Observe the real close event while retaining the no-request assertion below.
+  const popupClosed = browser.context.waitForEvent('page', { timeout: 5000 }).then(popup =>
+    popup.isClosed() ? undefined : popup.waitForEvent('close', { timeout: 5000 }));
+  await Promise.all([popupClosed, browser.page.locator('#popup').click()]);
   assert.equal(browser.context.pages().length, 1);
   assert.equal(f.requests.includes('/popup'), false);
 });
